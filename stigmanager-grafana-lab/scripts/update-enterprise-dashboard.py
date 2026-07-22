@@ -30,6 +30,16 @@ FILTER = "collectionId IN (${collections:singlequote})"
 GREEN, BLUE, RED, ORANGE, YELLOW, DARKRED = (
     "green", "blue", "red", "orange", "#EAB839", "dark-red")
 
+# STIG Manager native palette (client/src/css/stigman.css)
+CAT1_COLOR = "#eba794"        # --color-severity-high   hsl(13,68%,75%)
+CAT2_COLOR = "#ffd68f"        # --color-severity-medium hsl(38,100%,78%)
+CAT3_COLOR = "#cdd2ea"        # --color-severity-low    hsl(230,41%,86%)
+SAVED_COLOR = "#cdd2ea"       # periwinkle (assessed/saved in the native UI)
+SUBMITTED_COLOR = "#c3deab"   # --metrics-status-chart-submitted-light
+ACCEPTED_COLOR = "#81dfaa"    # --metrics-status-chart-accepted-light
+REJECTED_COLOR = "#eba995"    # --metrics-status-chart-rejected-light
+UNASSESSED_COLOR = "#ededed"  # --metrics-status-chart-unassessed-light
+
 COVERAGE_THRESHOLDS = {"mode": "absolute", "steps": [
     {"color": "red", "value": None},
     {"color": "orange", "value": 70},
@@ -125,6 +135,35 @@ def stat(grid, title, q, unit=None, thresholds=None, decimals=0, desc=""):
             "thresholds": thresholds or NEUTRAL_THRESHOLDS,
             "color": {"mode": "thresholds"}}, "overrides": []},
     }
+
+
+def tile_stat(grid, title, q, field_colors, desc="", calcs="lastNotNull",
+              transformations=None):
+    """Native-UI style colored boxes: one stat panel, one colored tile per
+    field (like STIG Manager's Findings / status boxes)."""
+    return {
+        "type": "stat", "title": title, "description": desc, "gridPos": grid,
+        "datasource": DS, "targets": [q],
+        **({"transformations": transformations} if transformations else {}),
+        "options": {"reduceOptions": {"values": False, "calcs": [calcs]},
+                    "colorMode": "background", "graphMode": "none",
+                    "justifyMode": "auto", "orientation": "auto",
+                    "textMode": "value_and_name", "wideLayout": True},
+        "fieldConfig": {"defaults": {"unit": "none", "decimals": 0,
+                                     "thresholds": NEUTRAL_THRESHOLDS,
+                                     "color": {"mode": "thresholds"}},
+                        "overrides": [color_override(n, c)
+                                      for n, c in field_colors]},
+    }
+
+
+SEVERITY_TILE_COLORS = [("CAT 1", CAT1_COLOR), ("CAT 2", CAT2_COLOR),
+                        ("CAT 3", CAT3_COLOR)]
+STATUS_TILE_COLORS = [("Unassessed", UNASSESSED_COLOR),
+                      ("Saved", SAVED_COLOR),
+                      ("Submitted", SUBMITTED_COLOR),
+                      ("Accepted", ACCEPTED_COLOR),
+                      ("Rejected", REJECTED_COLOR)]
 
 
 def donut(grid, title, url, desc="", calcs="sum"):
@@ -284,12 +323,34 @@ def build():
                                      "color": {"mode": "palette-classic"},
                                      "custom": {"axisCenteredZero": False,
                                                 "axisPlacement": "auto",
-                                                "fillOpacity": 85,
-                                                "lineWidth": 1}},
-                        "overrides": [color_override("CAT I", DARKRED),
-                                      color_override("CAT II", ORANGE),
-                                      color_override("CAT III", YELLOW)]},
+                                                "fillOpacity": 55,
+                                                "lineWidth": 2}},
+                        "overrides": [color_override("CAT I", CAT1_COLOR),
+                                      color_override("CAT II", CAT2_COLOR),
+                                      color_override("CAT III", CAT3_COLOR)]},
     })
+
+    # ---- review workflow status (native STIG Manager colors) -----------
+    status_q = query("A", META_URL, [
+        col("collectionId", "collectionId", "string"),
+        col("metrics.assessments", "assessments"),
+        col("metrics.assessed", "assessed"),
+        col("metrics.statuses.saved", "Saved"),
+        col("metrics.statuses.submitted", "Submitted"),
+        col("metrics.statuses.accepted", "Accepted"),
+        col("metrics.statuses.rejected", "Rejected")],
+        computed=[{"selector": "assessments - assessed",
+                   "text": "Unassessed", "type": "number"}])
+    panels.append(tile_stat(
+        {"h": 5, "w": 24, "x": 0, "y": 28},
+        "Review workflow status (selected collections)", status_q,
+        STATUS_TILE_COLORS, calcs="sum",
+        desc="Where reviews sit in the workflow, summed across the "
+             "selection. Colors match the STIG Manager UI. Workflow status "
+             "is intentionally separate from the security-posture donut.",
+        transformations=[{"id": "filterFieldsByName", "options": {
+            "include": {"names": ["Unassessed", "Saved", "Submitted",
+                                  "Accepted", "Rejected"]}}}]))
 
     panels.append(gauge(
         {"h": 9, "w": 6, "x": 18, "y": 4}, "Enterprise CORA risk score",

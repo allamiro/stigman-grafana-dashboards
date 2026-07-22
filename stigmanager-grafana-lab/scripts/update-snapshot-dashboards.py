@@ -28,6 +28,10 @@ OUT = (pathlib.Path(__file__).resolve().parent.parent
 
 GREEN, BLUE, RED, ORANGE, YELLOW, DARKRED = (
     "green", "blue", "red", "orange", "#EAB839", "dark-red")
+# STIG Manager native palette (client stigman.css)
+CAT1_COLOR, CAT2_COLOR, CAT3_COLOR = "#eba794", "#ffd68f", "#cdd2ea"
+SAVED_COLOR, SUBMITTED_COLOR = "#cdd2ea", "#c3deab"
+ACCEPTED_COLOR, REJECTED_COLOR, UNASSESSED_COLOR = "#81dfaa", "#eba995", "#ededed"
 
 COVERAGE_THRESHOLDS = {"mode": "absolute", "steps": [
     {"color": "red", "value": None}, {"color": "orange", "value": 70},
@@ -165,39 +169,67 @@ def donut(grid, title, coll=None, desc=""):
 
 
 def severity_bars(grid, title, coll=None, desc=""):
+    """Colored tiles matching the native STIG Manager severity boxes."""
     return {
-        "type": "barchart", "title": title, "description": desc,
+        "type": "stat", "title": title, "description": desc,
         "gridPos": grid, "datasource": DS,
         "targets": [
             target(sev_sum("stigman_collection_findings", "high", coll),
-                   "CAT I (critical)", "A"),
+                   "CAT 1", "A"),
             target(sev_sum("stigman_collection_findings", "medium", coll),
-                   "CAT II (medium)", "B"),
+                   "CAT 2", "B"),
             target(sev_sum("stigman_collection_findings", "low", coll),
-                   "CAT III (low)", "C")],
-        "transformations": [
-            {"id": "reduce", "options": {"reducers": ["lastNotNull"]}},
-            {"id": "organize", "options": {
-                "renameByName": {"Field": "Severity"},
-                "excludeByName": {}, "indexByName": {}}}],
-        "options": {"orientation": "horizontal", "stacking": "none",
-                    "xTickLabelRotation": 0, "xTickLabelSpacing": 0,
-                    "showValue": "always", "groupWidth": 0.7,
-                    "barWidth": 0.6, "fullHighlight": False,
-                    "legend": {"displayMode": "list", "placement": "bottom",
-                               "showLegend": False},
-                    "tooltip": {"mode": "single", "sort": "none"}},
-        "fieldConfig": {"defaults": {"unit": "none",
-                                     "color": {"mode": "fixed",
-                                               "fixedColor": DARKRED},
-                                     "custom": {"fillOpacity": 85,
-                                                "lineWidth": 1,
-                                                "axisCenteredZero": False,
-                                                "axisPlacement": "auto"}},
+                   "CAT 3", "C")],
+        "options": {"reduceOptions": {"values": False,
+                                      "calcs": ["lastNotNull"]},
+                    "colorMode": "background", "graphMode": "none",
+                    "justifyMode": "auto", "orientation": "auto",
+                    "textMode": "value_and_name", "wideLayout": True},
+        "fieldConfig": {"defaults": {"unit": "none", "decimals": 0,
+                                     "thresholds": NEUTRAL_THRESHOLDS,
+                                     "color": {"mode": "thresholds"}},
+                        "overrides": [name_override("CAT 1", CAT1_COLOR),
+                                      name_override("CAT 2", CAT2_COLOR),
+                                      name_override("CAT 3", CAT3_COLOR)]},
+    }
+
+
+def status_tiles(grid, title, coll=None, desc=""):
+    """Workflow-status tiles with native STIG Manager colors."""
+    def ssel(status):
+        m = [f'status="{status}"']
+        if coll:
+            m.append(f'collection_name=~"{coll}"')
+        return "{" + ",".join(m) + "}"
+    return {
+        "type": "stat", "title": title, "description": desc,
+        "gridPos": grid, "datasource": DS,
+        "targets": [
+            target(f'sum(stigman_collection_assessments{csel(coll)}) - '
+                   f'sum(stigman_collection_assessed{csel(coll)})',
+                   "Unassessed", "A"),
+            target(f'sum(stigman_collection_statuses{ssel("saved")})',
+                   "Saved", "B"),
+            target(f'sum(stigman_collection_statuses{ssel("submitted")})',
+                   "Submitted", "C"),
+            target(f'sum(stigman_collection_statuses{ssel("accepted")})',
+                   "Accepted", "D"),
+            target(f'sum(stigman_collection_statuses{ssel("rejected")})',
+                   "Rejected", "E")],
+        "options": {"reduceOptions": {"values": False,
+                                      "calcs": ["lastNotNull"]},
+                    "colorMode": "background", "graphMode": "none",
+                    "justifyMode": "auto", "orientation": "auto",
+                    "textMode": "value_and_name", "wideLayout": True},
+        "fieldConfig": {"defaults": {"unit": "none", "decimals": 0,
+                                     "thresholds": NEUTRAL_THRESHOLDS,
+                                     "color": {"mode": "thresholds"}},
                         "overrides": [
-                            {"matcher": {"id": "byType", "options": "number"},
-                             "properties": [{"id": "displayName",
-                                             "value": "Open findings"}]}]},
+                            name_override("Unassessed", UNASSESSED_COLOR),
+                            name_override("Saved", SAVED_COLOR),
+                            name_override("Submitted", SUBMITTED_COLOR),
+                            name_override("Accepted", ACCEPTED_COLOR),
+                            name_override("Rejected", REJECTED_COLOR)]},
     }
 
 
@@ -309,13 +341,13 @@ panels.append({
                 "tooltip": {"mode": "single", "sort": "none"}},
     "fieldConfig": {"defaults": {"unit": "none",
                                  "color": {"mode": "palette-classic"},
-                                 "custom": {"fillOpacity": 85,
-                                            "lineWidth": 1,
+                                 "custom": {"fillOpacity": 55,
+                                            "lineWidth": 2,
                                             "axisCenteredZero": False,
                                             "axisPlacement": "auto"}},
-                    "overrides": [name_override("CAT I", DARKRED),
-                                  name_override("CAT II", ORANGE),
-                                  name_override("CAT III", YELLOW)]},
+                    "overrides": [name_override("CAT I", CAT1_COLOR),
+                                  name_override("CAT II", CAT2_COLOR),
+                                  name_override("CAT III", CAT3_COLOR)]},
 })
 
 panels.append(gauge({"h": 9, "w": 6, "x": 18, "y": 10},
@@ -402,7 +434,12 @@ rep_var = {
     "current": {"selected": True, "text": ["All"], "value": ["$__all"]},
     "options": [],
 }
-rep = donut({"h": 7, "w": 6, "x": 0, "y": 26}, "$collection — posture",
+panels.append(status_tiles({"h": 4, "w": 24, "x": 0, "y": 26},
+                            "Review workflow status (all collections)",
+                            desc="Where reviews sit in the workflow. Colors "
+                                 "match the STIG Manager UI."))
+
+rep = donut({"h": 7, "w": 6, "x": 0, "y": 30}, "$collection — posture",
             coll="$collection", desc="Repeats per selected collection.")
 rep["repeat"] = "collection"
 rep["repeatDirection"] = "h"
@@ -440,7 +477,10 @@ cpanels = [
          desc="Open critical findings. Red when >= 1."),
     severity_bars({"h": 5, "w": 10, "x": 9, "y": 5},
                   "Open findings by severity", coll=C,
-                  desc="CAT I = high, CAT II = medium, CAT III = low."),
+                  desc="CAT 1 = high, CAT 2 = medium, CAT 3 = low."),
+    status_tiles({"h": 4, "w": 24, "x": 0, "y": 10},
+                 "Review workflow status", coll=C,
+                 desc="Where this collection's reviews sit in the workflow."),
 ]
 coll_var = {
     "name": "collection", "label": "Collection", "type": "query",

@@ -138,34 +138,26 @@ panels.append(ent.donut({"h": 9, "w": 9, "x": 0, "y": 12},
 panels[-1]["targets"][0].pop("filterExpression", None)
 
 panels.append({
-    "type": "barchart", "title": "Open findings by severity — all environments",
+    "type": "stat", "title": "Open findings by severity — all environments",
     "description": "CAT I = critical, CAT II = medium, CAT III = low. "
-                   "Summed across every environment.",
+                   "Summed across every environment. Colors match the "
+                   "STIG Manager UI.",
     "gridPos": {"h": 9, "w": 9, "x": 9, "y": 12}, "datasource": DS,
     "targets": [q([col("metrics.findings.high", "CAT I (critical)"),
                    col("metrics.findings.medium", "CAT II (medium)"),
-                   col("metrics.findings.low", "CAT III (low)")])],
-    "transformations": [
-        {"id": "reduce", "options": {"reducers": ["sum"]}},
-        {"id": "organize", "options": {"renameByName": {"Field": "Severity"},
-                                       "excludeByName": {}, "indexByName": {}}}],
-    "options": {"orientation": "horizontal", "stacking": "none",
-                "xTickLabelRotation": 0, "xTickLabelSpacing": 0,
-                "showValue": "always", "groupWidth": 0.7, "barWidth": 0.6,
-                "fullHighlight": False,
-                "legend": {"displayMode": "list", "placement": "bottom",
-                           "showLegend": False},
-                "tooltip": {"mode": "single", "sort": "none"}},
-    "fieldConfig": {"defaults": {"unit": "none",
-                                 "color": {"mode": "fixed",
-                                           "fixedColor": "dark-red"},
-                                 "custom": {"fillOpacity": 85, "lineWidth": 1,
-                                            "axisCenteredZero": False,
-                                            "axisPlacement": "auto"}},
+                   col("metrics.findings.low", "CAT III (low)")],
+                  summarize=None)],
+    "options": {"reduceOptions": {"values": False, "calcs": ["sum"]},
+                "colorMode": "background", "graphMode": "none",
+                "justifyMode": "auto", "orientation": "auto",
+                "textMode": "value_and_name", "wideLayout": True},
+    "fieldConfig": {"defaults": {"unit": "none", "decimals": 0,
+                                 "thresholds": ent.NEUTRAL_THRESHOLDS,
+                                 "color": {"mode": "thresholds"}},
                     "overrides": [
-                        {"matcher": {"id": "byType", "options": "number"},
-                         "properties": [{"id": "displayName",
-                                         "value": "Open findings"}]}]},
+                        ent.color_override("CAT I (critical)", ent.CAT1_COLOR),
+                        ent.color_override("CAT II (medium)", ent.CAT2_COLOR),
+                        ent.color_override("CAT III (low)", ent.CAT3_COLOR)]},
 })
 
 scope_stats = [

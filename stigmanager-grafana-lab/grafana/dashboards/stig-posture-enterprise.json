@@ -918,8 +918,8 @@
           "custom": {
             "axisCenteredZero": false,
             "axisPlacement": "auto",
-            "fillOpacity": 85,
-            "lineWidth": 1
+            "fillOpacity": 55,
+            "lineWidth": 2
           }
         },
         "overrides": [
@@ -933,7 +933,7 @@
                 "id": "color",
                 "value": {
                   "mode": "fixed",
-                  "fixedColor": "dark-red"
+                  "fixedColor": "#eba794"
                 }
               }
             ]
@@ -948,7 +948,7 @@
                 "id": "color",
                 "value": {
                   "mode": "fixed",
-                  "fixedColor": "orange"
+                  "fixedColor": "#ffd68f"
                 }
               }
             ]
@@ -963,7 +963,7 @@
                 "id": "color",
                 "value": {
                   "mode": "fixed",
-                  "fixedColor": "#EAB839"
+                  "fixedColor": "#cdd2ea"
                 }
               }
             ]
@@ -971,6 +971,212 @@
         ]
       },
       "id": 9
+    },
+    {
+      "type": "stat",
+      "title": "Review workflow status (selected collections)",
+      "description": "Where reviews sit in the workflow, summed across the selection. Colors match the STIG Manager UI. Workflow status is intentionally separate from the security-posture donut.",
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 37
+      },
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "stigmanager-infinity"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "stigmanager-infinity"
+          },
+          "queryType": "infinity",
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://stigman:54000/api/collections/meta/metrics/summary/collection",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "",
+          "columns": [
+            {
+              "selector": "collectionId",
+              "text": "collectionId",
+              "type": "string"
+            },
+            {
+              "selector": "metrics.assessments",
+              "text": "assessments",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.assessed",
+              "text": "assessed",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.statuses.saved",
+              "text": "Saved",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.statuses.submitted",
+              "text": "Submitted",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.statuses.accepted",
+              "text": "Accepted",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.statuses.rejected",
+              "text": "Rejected",
+              "type": "number"
+            }
+          ],
+          "computed_columns": [
+            {
+              "selector": "assessments - assessed",
+              "text": "Unassessed",
+              "type": "number"
+            }
+          ],
+          "filterExpression": "collectionId IN (${collections:singlequote})"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "Unassessed",
+                "Saved",
+                "Submitted",
+                "Accepted",
+                "Rejected"
+              ]
+            }
+          }
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "sum"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Unassessed"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#ededed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Saved"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#cdd2ea"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Submitted"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#c3deab"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Accepted"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#81dfaa"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Rejected"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#eba995"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "id": 10
     },
     {
       "type": "gauge",
@@ -1107,7 +1313,7 @@
         },
         "overrides": []
       },
-      "id": 10
+      "id": 11
     },
     {
       "type": "table",
@@ -1429,7 +1635,7 @@
           }
         ]
       },
-      "id": 11
+      "id": 12
     },
     {
       "type": "piechart",
@@ -1617,7 +1823,7 @@
       "repeat": "collections",
       "repeatDirection": "h",
       "maxPerRow": 4,
-      "id": 12
+      "id": 13
     }
   ]
 }

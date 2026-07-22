@@ -888,7 +888,7 @@
       "id": 8
     },
     {
-      "type": "barchart",
+      "type": "stat",
       "title": "Driver 2 \u2014 open findings by severity",
       "description": "Confirmed failures awaiting remediation, worst first. CAT I drives the risk score 10x harder than CAT III.",
       "gridPos": {
@@ -938,69 +938,80 @@
           ]
         }
       ],
-      "transformations": [
-        {
-          "id": "reduce",
-          "options": {
-            "reducers": [
-              "sum"
-            ]
-          }
-        },
-        {
-          "id": "organize",
-          "options": {
-            "renameByName": {
-              "Field": "Severity"
-            },
-            "excludeByName": {},
-            "indexByName": {}
-          }
-        }
-      ],
       "options": {
-        "orientation": "horizontal",
-        "stacking": "none",
-        "xTickLabelRotation": 0,
-        "xTickLabelSpacing": 0,
-        "showValue": "always",
-        "groupWidth": 0.7,
-        "barWidth": 0.6,
-        "fullHighlight": false,
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": false
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ]
         },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "textMode": "value_and_name",
+        "wideLayout": true
       },
       "fieldConfig": {
         "defaults": {
           "unit": "none",
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "dark-red"
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
           },
-          "custom": {
-            "fillOpacity": 85,
-            "lineWidth": 1,
-            "axisCenteredZero": false,
-            "axisPlacement": "auto"
+          "color": {
+            "mode": "thresholds"
           }
         },
         "overrides": [
           {
             "matcher": {
-              "id": "byType",
-              "options": "number"
+              "id": "byName",
+              "options": "CAT I (critical)"
             },
             "properties": [
               {
-                "id": "displayName",
-                "value": "Checks"
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#eba794"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CAT II (medium)"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#ffd68f"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CAT III (low)"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#cdd2ea"
+                }
               }
             ]
           }
@@ -1009,7 +1020,7 @@
       "id": 9
     },
     {
-      "type": "barchart",
+      "type": "stat",
       "title": "Driver 3 \u2014 unassessed backlog by severity",
       "description": "Checks not yet performed, by severity. These count toward risk because an unchecked critical control is not a passed one.",
       "gridPos": {
@@ -1091,6 +1102,85 @@
           ]
         }
       ],
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CAT I (critical)"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#eba794"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CAT II (medium)"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#ffd68f"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CAT III (low)"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#cdd2ea"
+                }
+              }
+            ]
+          }
+        ]
+      },
       "transformations": [
         {
           "id": "filterFieldsByName",
@@ -1103,74 +1193,8 @@
               ]
             }
           }
-        },
-        {
-          "id": "reduce",
-          "options": {
-            "reducers": [
-              "sum"
-            ]
-          }
-        },
-        {
-          "id": "organize",
-          "options": {
-            "renameByName": {
-              "Field": "Severity"
-            },
-            "excludeByName": {},
-            "indexByName": {}
-          }
         }
       ],
-      "options": {
-        "orientation": "horizontal",
-        "stacking": "none",
-        "xTickLabelRotation": 0,
-        "xTickLabelSpacing": 0,
-        "showValue": "always",
-        "groupWidth": 0.7,
-        "barWidth": 0.6,
-        "fullHighlight": false,
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": false
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "none",
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "dark-red"
-          },
-          "custom": {
-            "fillOpacity": 85,
-            "lineWidth": 1,
-            "axisCenteredZero": false,
-            "axisPlacement": "auto"
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byType",
-              "options": "number"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Checks"
-              }
-            ]
-          }
-        ]
-      },
       "id": 10
     },
     {

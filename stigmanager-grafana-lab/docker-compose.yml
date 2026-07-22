@@ -182,6 +182,7 @@ services:
       - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
       - ./grafana/dashboards-trends:/var/lib/grafana/dashboards-trends:ro
       - ./grafana/dashboards-snapshots:/var/lib/grafana/dashboards-snapshots:ro
+      - ./grafana/dashboards-cyber:/var/lib/grafana/dashboards-cyber:ro
     networks: [stigman-lab]
     ports:
       - "3200:3000"   # documented deviation: host 3000 is occupied

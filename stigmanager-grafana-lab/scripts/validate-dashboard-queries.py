@@ -33,13 +33,15 @@ def http_json(path, body=None):
         return json.load(r)
 
 
-def substitute(target, cids):
+def substitute(target, cids, asset_id="1"):
     s = json.dumps(target)
     quoted = ",".join(f"'{c}'" for c in cids)
     s = s.replace("${collections:singlequote}", quoted)
     s = s.replace("${collections:text}", "substituted")
     s = s.replace("${collections}", cids[0])
     s = s.replace("$collection", cids[0])
+    s = s.replace("${asset:text}", "substituted")
+    s = s.replace("$asset", asset_id)
     return json.loads(s)
 
 
@@ -59,13 +61,24 @@ def main():
         return 1
     print(f"collection variable resolves to: {cids}")
 
+    # resolve a real asset in cids[0] the way the asset variable would
+    asset_q = dict(var_q, url=f"http://stigman:54000/api/collections/{cids[0]}"
+                              "/metrics/summary/asset",
+                   columns=[{"selector": "assetId", "text": "id",
+                             "type": "string"}])
+    aresp = http_json("/api/ds/query",
+                      {"queries": [asset_q], "from": "now-1h", "to": "now"})
+    avals = aresp["results"]["v"]["frames"][0]["data"]["values"]
+    asset_id = avals[0][0] if avals and avals[0] else "1"
+    print(f"asset variable resolves to: {asset_id}")
+
     failures = 0
     for uid in sys.argv[1:]:
         dash = http_json(f"/api/dashboards/uid/{uid}")["dashboard"]
         print(f"== {dash['title']} ({uid})")
         for panel in dash.get("panels", []):
             for target in panel.get("targets", []):
-                q = substitute(copy.deepcopy(target), cids)
+                q = substitute(copy.deepcopy(target), cids, asset_id)
                 try:
                     r = http_json("/api/ds/query",
                                   {"queries": [q], "from": "now-1h", "to": "now"})

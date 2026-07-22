@@ -77,7 +77,7 @@
       "id": 1,
       "type": "piechart",
       "title": "Security posture \u2014 $collection",
-      "description": "Compliant = pass, Not Applicable = notapplicable, Open Findings = fail, Not Assessed = assessments - assessed. Workflow statuses (saved/submitted/accepted/rejected) are deliberately excluded.",
+      "description": "Compliant = pass, Not Applicable = notapplicable, Open Findings = fail, Not Assessed = assessments - assessed. Workflow statuses are shown separately below.",
       "gridPos": {
         "h": 10,
         "w": 9,
@@ -254,10 +254,9 @@
       }
     },
     {
-      "id": 2,
       "type": "gauge",
       "title": "Assessment coverage",
-      "description": "Coverage = assessed / assessments. Guarded against division by zero (0% when the collection has no assessments).",
+      "description": "Coverage = assessed / assessments (0% when the collection has no assessments).",
       "gridPos": {
         "h": 5,
         "w": 5,
@@ -307,18 +306,6 @@
           ]
         }
       ],
-      "transformations": [
-        {
-          "id": "filterFieldsByName",
-          "options": {
-            "include": {
-              "names": [
-                "Coverage"
-              ]
-            }
-          }
-        }
-      ],
       "options": {
         "reduceOptions": {
           "values": false,
@@ -360,13 +347,25 @@
           }
         },
         "overrides": []
-      }
+      },
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "Coverage"
+              ]
+            }
+          }
+        }
+      ],
+      "id": 2
     },
     {
-      "id": 3,
       "type": "gauge",
       "title": "CORA risk score (this collection)",
-      "description": "Per-collection CORA-style weighted risk score: for each severity, p = (open findings + unassessed) / assessments; CORA = (p1*10 + p2*4 + p3*1) / 15. Zero-assessment severities contribute 0. Bands: 0% Low, >0% Moderate, >=10% High, >=20% Very High. Lab interpretation \u2014 verify against current DISA CORA guidance before treating as authoritative.",
+      "description": "CORA-style weighted risk score computed from aggregated raw counts: p_sev = (open findings + unassessed) / assessments per severity, CORA = (p1*10 + p2*4 + p3*1) / 15. Zero-assessment severities contribute 0. Bands: 0% Low, >0% Moderate, >=10% High, >=20% Very High. Lab interpretation \u2014 verify against current DISA CORA guidance before treating as authoritative.",
       "gridPos": {
         "h": 5,
         "w": 5,
@@ -451,18 +450,6 @@
           ]
         }
       ],
-      "transformations": [
-        {
-          "id": "filterFieldsByName",
-          "options": {
-            "include": {
-              "names": [
-                "CORA"
-              ]
-            }
-          }
-        }
-      ],
       "options": {
         "reduceOptions": {
           "values": false,
@@ -508,10 +495,22 @@
           }
         },
         "overrides": []
-      }
+      },
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "CORA"
+              ]
+            }
+          }
+        }
+      ],
+      "id": 3
     },
     {
-      "id": 4,
       "type": "stat",
       "title": "Open findings",
       "description": "Reviews with result = fail.",
@@ -588,13 +587,13 @@
           }
         },
         "overrides": []
-      }
+      },
+      "id": 4
     },
     {
-      "id": 5,
       "type": "stat",
-      "title": "CAT I findings",
-      "description": "Open findings of severity high. Red when >= 1.",
+      "title": "CAT 1 findings",
+      "description": "Open critical findings. Red when >= 1.",
       "gridPos": {
         "h": 5,
         "w": 5,
@@ -626,7 +625,7 @@
           "columns": [
             {
               "selector": "metrics.findings.high",
-              "text": "CAT I",
+              "text": "CAT 1",
               "type": "number"
             }
           ]
@@ -668,13 +667,13 @@
           }
         },
         "overrides": []
-      }
+      },
+      "id": 5
     },
     {
-      "id": 6,
-      "type": "barchart",
+      "type": "stat",
       "title": "Open findings by severity",
-      "description": "CAT I = high, CAT II = medium, CAT III = low.",
+      "description": "CAT 1 = high, CAT 2 = medium, CAT 3 = low. Colors match the STIG Manager UI.",
       "gridPos": {
         "h": 5,
         "w": 10,
@@ -706,17 +705,171 @@
           "columns": [
             {
               "selector": "metrics.findings.high",
-              "text": "CAT I",
+              "text": "CAT 1",
               "type": "number"
             },
             {
               "selector": "metrics.findings.medium",
-              "text": "CAT II",
+              "text": "CAT 2",
               "type": "number"
             },
             {
               "selector": "metrics.findings.low",
-              "text": "CAT III",
+              "text": "CAT 3",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CAT 1"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#eba794"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CAT 2"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#ffd68f"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CAT 3"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#cdd2ea"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "id": 6
+    },
+    {
+      "type": "stat",
+      "title": "Review workflow status",
+      "description": "Where this collection's reviews sit in the workflow. Colors match the STIG Manager UI. Kept separate from the security-posture donut.",
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 10
+      },
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "stigmanager-infinity"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "stigmanager-infinity"
+          },
+          "queryType": "infinity",
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://stigman:54000/api/collections/$collection/metrics/summary/collection",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "",
+          "columns": [
+            {
+              "selector": "metrics.assessments",
+              "text": "assessments",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.assessed",
+              "text": "assessed",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.statuses.saved",
+              "text": "Saved",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.statuses.submitted",
+              "text": "Submitted",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.statuses.accepted",
+              "text": "Accepted",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.statuses.rejected",
+              "text": "Rejected",
+              "type": "number"
+            }
+          ],
+          "computed_columns": [
+            {
+              "selector": "assessments - assessed",
+              "text": "Unassessed",
               "type": "number"
             }
           ]
@@ -724,72 +877,130 @@
       ],
       "transformations": [
         {
-          "id": "reduce",
+          "id": "filterFieldsByName",
           "options": {
-            "reducers": [
-              "lastNotNull"
-            ]
-          }
-        },
-        {
-          "id": "organize",
-          "options": {
-            "renameByName": {
-              "Field": "Severity"
-            },
-            "excludeByName": {},
-            "indexByName": {}
+            "include": {
+              "names": [
+                "Unassessed",
+                "Saved",
+                "Submitted",
+                "Accepted",
+                "Rejected"
+              ]
+            }
           }
         }
       ],
       "options": {
-        "orientation": "horizontal",
-        "stacking": "none",
-        "xTickLabelRotation": 0,
-        "xTickLabelSpacing": 0,
-        "showValue": "always",
-        "groupWidth": 0.7,
-        "barWidth": 0.6,
-        "fullHighlight": false,
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": false
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ]
         },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "textMode": "value_and_name",
+        "wideLayout": true
       },
       "fieldConfig": {
         "defaults": {
           "unit": "none",
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "dark-red"
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
           },
-          "custom": {
-            "fillOpacity": 85,
-            "lineWidth": 1,
-            "axisCenteredZero": false,
-            "axisPlacement": "auto"
+          "color": {
+            "mode": "thresholds"
           }
         },
         "overrides": [
           {
             "matcher": {
-              "id": "byType",
-              "options": "number"
+              "id": "byName",
+              "options": "Unassessed"
             },
             "properties": [
               {
-                "id": "displayName",
-                "value": "Open findings"
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#ededed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Saved"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#cdd2ea"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Submitted"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#c3deab"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Accepted"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#81dfaa"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Rejected"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#eba995"
+                }
               }
             ]
           }
         ]
-      }
+      },
+      "id": 7
     }
   ]
 }

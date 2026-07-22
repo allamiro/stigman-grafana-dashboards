@@ -31,3 +31,13 @@ providers:
     options:
       path: /var/lib/grafana/dashboards-snapshots
       foldersFromFilesStructure: false
+  - name: stig-posture-cyber
+    orgId: 1
+    folder: STIG Posture (Cyber Analysis)
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards-cyber
+      foldersFromFilesStructure: false

@@ -524,9 +524,9 @@
       "id": 5
     },
     {
-      "type": "barchart",
+      "type": "stat",
       "title": "Open findings by severity",
-      "description": "CAT I = high, CAT II = medium, CAT III = low.",
+      "description": "CAT 1 = high, CAT 2 = medium, CAT 3 = low.",
       "gridPos": {
         "h": 5,
         "w": 10,
@@ -546,7 +546,7 @@
           },
           "expr": "sum(stigman_collection_findings{severity=\"high\",collection_name=~\"$collection\"})",
           "editorMode": "code",
-          "legendFormat": "CAT I (critical)",
+          "legendFormat": "CAT 1",
           "range": false,
           "instant": true,
           "format": "time_series"
@@ -559,7 +559,7 @@
           },
           "expr": "sum(stigman_collection_findings{severity=\"medium\",collection_name=~\"$collection\"})",
           "editorMode": "code",
-          "legendFormat": "CAT II (medium)",
+          "legendFormat": "CAT 2",
           "range": false,
           "instant": true,
           "format": "time_series"
@@ -572,81 +572,284 @@
           },
           "expr": "sum(stigman_collection_findings{severity=\"low\",collection_name=~\"$collection\"})",
           "editorMode": "code",
-          "legendFormat": "CAT III (low)",
+          "legendFormat": "CAT 3",
           "range": false,
           "instant": true,
           "format": "time_series"
         }
       ],
-      "transformations": [
-        {
-          "id": "reduce",
-          "options": {
-            "reducers": [
-              "lastNotNull"
-            ]
-          }
-        },
-        {
-          "id": "organize",
-          "options": {
-            "renameByName": {
-              "Field": "Severity"
-            },
-            "excludeByName": {},
-            "indexByName": {}
-          }
-        }
-      ],
       "options": {
-        "orientation": "horizontal",
-        "stacking": "none",
-        "xTickLabelRotation": 0,
-        "xTickLabelSpacing": 0,
-        "showValue": "always",
-        "groupWidth": 0.7,
-        "barWidth": 0.6,
-        "fullHighlight": false,
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": false
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ]
         },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "textMode": "value_and_name",
+        "wideLayout": true
       },
       "fieldConfig": {
         "defaults": {
           "unit": "none",
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "dark-red"
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
           },
-          "custom": {
-            "fillOpacity": 85,
-            "lineWidth": 1,
-            "axisCenteredZero": false,
-            "axisPlacement": "auto"
+          "color": {
+            "mode": "thresholds"
           }
         },
         "overrides": [
           {
             "matcher": {
-              "id": "byType",
-              "options": "number"
+              "id": "byName",
+              "options": "CAT 1"
             },
             "properties": [
               {
-                "id": "displayName",
-                "value": "Open findings"
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#eba794"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CAT 2"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#ffd68f"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CAT 3"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#cdd2ea"
+                }
               }
             ]
           }
         ]
       },
       "id": 6
+    },
+    {
+      "type": "stat",
+      "title": "Review workflow status",
+      "description": "Where this collection's reviews sit in the workflow.",
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 10
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "stigmanager-prometheus"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "stigmanager-prometheus"
+          },
+          "expr": "sum(stigman_collection_assessments{collection_name=~\"$collection\"}) - sum(stigman_collection_assessed{collection_name=~\"$collection\"})",
+          "editorMode": "code",
+          "legendFormat": "Unassessed",
+          "range": false,
+          "instant": true,
+          "format": "time_series"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "stigmanager-prometheus"
+          },
+          "expr": "sum(stigman_collection_statuses{status=\"saved\",collection_name=~\"$collection\"})",
+          "editorMode": "code",
+          "legendFormat": "Saved",
+          "range": false,
+          "instant": true,
+          "format": "time_series"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "stigmanager-prometheus"
+          },
+          "expr": "sum(stigman_collection_statuses{status=\"submitted\",collection_name=~\"$collection\"})",
+          "editorMode": "code",
+          "legendFormat": "Submitted",
+          "range": false,
+          "instant": true,
+          "format": "time_series"
+        },
+        {
+          "refId": "D",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "stigmanager-prometheus"
+          },
+          "expr": "sum(stigman_collection_statuses{status=\"accepted\",collection_name=~\"$collection\"})",
+          "editorMode": "code",
+          "legendFormat": "Accepted",
+          "range": false,
+          "instant": true,
+          "format": "time_series"
+        },
+        {
+          "refId": "E",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "stigmanager-prometheus"
+          },
+          "expr": "sum(stigman_collection_statuses{status=\"rejected\",collection_name=~\"$collection\"})",
+          "editorMode": "code",
+          "legendFormat": "Rejected",
+          "range": false,
+          "instant": true,
+          "format": "time_series"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Unassessed"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#ededed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Saved"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#cdd2ea"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Submitted"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#c3deab"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Accepted"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#81dfaa"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Rejected"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#eba995"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "id": 7
     }
   ]
 }

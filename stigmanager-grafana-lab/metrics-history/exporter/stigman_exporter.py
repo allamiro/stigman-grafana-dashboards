@@ -116,6 +116,11 @@ class StigmanCollector:
         g_assessed_sev = GaugeMetricFamily(
             "stigman_collection_assessed_by_severity",
             "Completed assessments by severity", labels=labels + ["severity"])
+        g_statuses = GaugeMetricFamily(
+            "stigman_collection_statuses",
+            "Assessed reviews by workflow status "
+            "(saved/submitted/accepted/rejected)",
+            labels=labels + ["status"])
         g_cora = GaugeMetricFamily(
             "stigman_collection_cora_percent",
             "CORA-style weighted risk score (0-100), lab interpretation",
@@ -132,6 +137,8 @@ class StigmanCollector:
             g_assets.add_metric(lv, row.get("assets", 0))
             for result, value in (m.get("results") or {}).items():
                 g_results.add_metric(lv + [result], value)
+            for status, value in (m.get("statuses") or {}).items():
+                g_statuses.add_metric(lv + [status], value)
             findings = m.get("findings") or {}
             assess_sev = m.get("assessmentsBySeverity") or {}
             assessed_sev = m.get("assessedBySeverity") or {}
@@ -147,8 +154,8 @@ class StigmanCollector:
         up.add_metric([], 1.0)
         duration.add_metric([], time.time() - started)
         for metric in (g_assess, g_assessed, g_assets, g_results, g_findings,
-                       g_assess_sev, g_assessed_sev, g_cora, g_touch,
-                       up, duration):
+                       g_assess_sev, g_assessed_sev, g_statuses, g_cora,
+                       g_touch, up, duration):
             yield metric
 
     def _fetch(self):

@@ -656,7 +656,7 @@
                 "id": "color",
                 "value": {
                   "mode": "fixed",
-                  "fixedColor": "dark-red"
+                  "fixedColor": "#eba794"
                 }
               }
             ]
@@ -671,7 +671,7 @@
                 "id": "color",
                 "value": {
                   "mode": "fixed",
-                  "fixedColor": "orange"
+                  "fixedColor": "#ffd68f"
                 }
               }
             ]
@@ -686,7 +686,7 @@
                 "id": "color",
                 "value": {
                   "mode": "fixed",
-                  "fixedColor": "#EAB839"
+                  "fixedColor": "#cdd2ea"
                 }
               }
             ]

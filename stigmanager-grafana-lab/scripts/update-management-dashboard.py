@@ -63,33 +63,26 @@ def stat(grid, title, query, unit, thresholds, decimals=0, desc="",
     return p
 
 
+SEVERITY_COLORS = [("CAT I (critical)", ent.CAT1_COLOR),
+                   ("CAT II (medium)", ent.CAT2_COLOR),
+                   ("CAT III (low)", ent.CAT3_COLOR)]
+
+
 def severity_bars(grid, title, target, desc):
+    """Colored tiles matching the native STIG Manager UI severity boxes."""
     return {
-        "type": "barchart", "title": title, "description": desc,
+        "type": "stat", "title": title, "description": desc,
         "gridPos": grid, "datasource": DS, "targets": [target],
-        "transformations": [
-            {"id": "reduce", "options": {"reducers": ["sum"]}},
-            {"id": "organize", "options": {
-                "renameByName": {"Field": "Severity"},
-                "excludeByName": {}, "indexByName": {}}}],
-        "options": {"orientation": "horizontal", "stacking": "none",
-                    "xTickLabelRotation": 0, "xTickLabelSpacing": 0,
-                    "showValue": "always", "groupWidth": 0.7,
-                    "barWidth": 0.6, "fullHighlight": False,
-                    "legend": {"displayMode": "list", "placement": "bottom",
-                               "showLegend": False},
-                    "tooltip": {"mode": "single", "sort": "none"}},
-        "fieldConfig": {"defaults": {"unit": "none",
-                                     "color": {"mode": "fixed",
-                                               "fixedColor": "dark-red"},
-                                     "custom": {"fillOpacity": 85,
-                                                "lineWidth": 1,
-                                                "axisCenteredZero": False,
-                                                "axisPlacement": "auto"}},
-                        "overrides": [
-                            {"matcher": {"id": "byType", "options": "number"},
-                             "properties": [{"id": "displayName",
-                                             "value": "Checks"}]}]},
+        "options": {"reduceOptions": {"values": False,
+                                      "calcs": ["lastNotNull"]},
+                    "colorMode": "background", "graphMode": "none",
+                    "justifyMode": "auto", "orientation": "auto",
+                    "textMode": "value_and_name", "wideLayout": True},
+        "fieldConfig": {"defaults": {"unit": "none", "decimals": 0,
+                                     "thresholds": ent.NEUTRAL_THRESHOLDS,
+                                     "color": {"mode": "thresholds"}},
+                        "overrides": [ent.color_override(n, c)
+                                      for n, c in SEVERITY_COLORS]},
     }
 
 
@@ -200,11 +193,11 @@ panels.append(severity_bars(
           {"selector": "aL - sL", "text": "CAT III (low)", "type": "number"}]),
     "Checks not yet performed, by severity. These count toward risk "
     "because an unchecked critical control is not a passed one."))
-# keep only the computed severity fields before the reduce step
-panels[-1]["transformations"].insert(0, {
+# keep only the computed severity fields (hide the raw helper columns)
+panels[-1]["transformations"] = [{
     "id": "filterFieldsByName",
     "options": {"include": {"names": ["CAT I (critical)", "CAT II (medium)",
-                                      "CAT III (low)"]}}})
+                                      "CAT III (low)"]}}}]
 
 # ======== TIER 3 — where to focus first =================================
 focus_q = q(

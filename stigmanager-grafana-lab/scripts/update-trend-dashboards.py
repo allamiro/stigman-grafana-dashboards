@@ -24,6 +24,7 @@ OUT = pathlib.Path(__file__).resolve().parent.parent / "grafana" / "dashboards-t
 
 GREEN, BLUE, RED, ORANGE, YELLOW, DARKRED = (
     "green", "blue", "red", "orange", "#EAB839", "dark-red")
+CAT1_COLOR, CAT2_COLOR, CAT3_COLOR = "#eba794", "#ffd68f", "#cdd2ea"
 
 COVERAGE_THRESHOLDS = {"mode": "absolute", "steps": [
     {"color": "red", "value": None}, {"color": "orange", "value": 70},
@@ -222,9 +223,9 @@ panels.append(timeseries(
      target('sum(stigman_collection_findings{severity="low"})',
             "CAT III (low)", "C")],
     "none", desc="Remediation progress: each line should trend down.",
-    overrides=[name_override("CAT I (critical)", DARKRED),
-               name_override("CAT II (medium)", ORANGE),
-               name_override("CAT III (low)", YELLOW)]))
+    overrides=[name_override("CAT I (critical)", CAT1_COLOR),
+               name_override("CAT II (medium)", CAT2_COLOR),
+               name_override("CAT III (low)", CAT3_COLOR)]))
 
 panels.append(timeseries(
     {"h": 9, "w": 12, "x": 12, "y": 18}, "Unassessed backlog over time",
@@ -287,9 +288,9 @@ cpanels = [
                 target(f'{BYC}(stigman_collection_findings{{severity="low",collection_name=~"$collection"}})',
                        "CAT III (low)", "C")],
                "none",
-               overrides=[name_override("CAT I (critical)", DARKRED),
-                          name_override("CAT II (medium)", ORANGE),
-                          name_override("CAT III (low)", YELLOW)]),
+               overrides=[name_override("CAT I (critical)", CAT1_COLOR),
+                          name_override("CAT II (medium)", CAT2_COLOR),
+                          name_override("CAT III (low)", CAT3_COLOR)]),
     timeseries({"h": 9, "w": 12, "x": 12, "y": 14},
                "Results composition over time",
                [target(f'{BYC}(stigman_collection_results{{result="pass",collection_name=~"$collection"}})',

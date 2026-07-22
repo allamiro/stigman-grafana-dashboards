@@ -782,8 +782,8 @@
             "mode": "palette-classic"
           },
           "custom": {
-            "fillOpacity": 85,
-            "lineWidth": 1,
+            "fillOpacity": 55,
+            "lineWidth": 2,
             "axisCenteredZero": false,
             "axisPlacement": "auto"
           }
@@ -799,7 +799,7 @@
                 "id": "color",
                 "value": {
                   "mode": "fixed",
-                  "fixedColor": "dark-red"
+                  "fixedColor": "#eba794"
                 }
               }
             ]
@@ -814,7 +814,7 @@
                 "id": "color",
                 "value": {
                   "mode": "fixed",
-                  "fixedColor": "orange"
+                  "fixedColor": "#ffd68f"
                 }
               }
             ]
@@ -829,7 +829,7 @@
                 "id": "color",
                 "value": {
                   "mode": "fixed",
-                  "fixedColor": "#EAB839"
+                  "fixedColor": "#cdd2ea"
                 }
               }
             ]
@@ -1207,6 +1207,198 @@
       "id": 10
     },
     {
+      "type": "stat",
+      "title": "Review workflow status (all collections)",
+      "description": "Where reviews sit in the workflow. Colors match the STIG Manager UI.",
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 26
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "stigmanager-prometheus"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "stigmanager-prometheus"
+          },
+          "expr": "sum(stigman_collection_assessments) - sum(stigman_collection_assessed)",
+          "editorMode": "code",
+          "legendFormat": "Unassessed",
+          "range": false,
+          "instant": true,
+          "format": "time_series"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "stigmanager-prometheus"
+          },
+          "expr": "sum(stigman_collection_statuses{status=\"saved\"})",
+          "editorMode": "code",
+          "legendFormat": "Saved",
+          "range": false,
+          "instant": true,
+          "format": "time_series"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "stigmanager-prometheus"
+          },
+          "expr": "sum(stigman_collection_statuses{status=\"submitted\"})",
+          "editorMode": "code",
+          "legendFormat": "Submitted",
+          "range": false,
+          "instant": true,
+          "format": "time_series"
+        },
+        {
+          "refId": "D",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "stigmanager-prometheus"
+          },
+          "expr": "sum(stigman_collection_statuses{status=\"accepted\"})",
+          "editorMode": "code",
+          "legendFormat": "Accepted",
+          "range": false,
+          "instant": true,
+          "format": "time_series"
+        },
+        {
+          "refId": "E",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "stigmanager-prometheus"
+          },
+          "expr": "sum(stigman_collection_statuses{status=\"rejected\"})",
+          "editorMode": "code",
+          "legendFormat": "Rejected",
+          "range": false,
+          "instant": true,
+          "format": "time_series"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Unassessed"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#ededed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Saved"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#cdd2ea"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Submitted"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#c3deab"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Accepted"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#81dfaa"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Rejected"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#eba995"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "id": 11
+    },
+    {
       "type": "piechart",
       "title": "$collection \u2014 posture",
       "description": "Repeats per selected collection.",
@@ -1214,7 +1406,7 @@
         "h": 7,
         "w": 6,
         "x": 0,
-        "y": 26
+        "y": 30
       },
       "datasource": {
         "type": "prometheus",
@@ -1372,7 +1564,7 @@
       "repeat": "collection",
       "repeatDirection": "h",
       "maxPerRow": 4,
-      "id": 11
+      "id": 12
     }
   ]
 }
