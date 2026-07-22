@@ -138,6 +138,20 @@ for cid_label in "1:os:linux" "2:os:windows"; do
   api PUT "/collections/$cid/labels/$LID/assets" -H 'Content-Type: application/json' -d "$AIDS" >/dev/null
 done
 
+# per-asset role labels (one asset each) for label drill-down demos
+role_label() { # CID ASSET_NAME LABEL COLOR
+  local cid="$1" aname="$2" label="$3" color="$4" lid aid
+  ensure_label "$cid" "$label" "$color"
+  lid=$(api GET "/collections/$cid/labels" | jq -r --arg n "$label" '.[] | select(.name == $n) | .labelId')
+  aid=$(api GET "/assets?collectionId=$cid" | jq -r --arg n "$aname" '.[] | select(.name == $n) | .assetId')
+  [[ -n "$aid" ]] && api PUT "/collections/$cid/labels/$lid/assets"     -H 'Content-Type: application/json' -d "[\"$aid\"]" >/dev/null
+}
+role_label 1 linux-web-01 role:web    c2f0c2
+role_label 1 linux-db-01  role:db     ffcc99
+role_label 1 linux-app-01 role:app    cc99ff
+role_label 2 win-dc-01    role:dc     c2f0c2
+role_label 2 win-fs-01    role:fs     ffcc99
+
 echo "creating assets ..."
 N1=$(ensure_asset "$NET_CID" vpn-gw-01   10.30.30.11 "$VPN_BENCH" "os:appliance,site:hq")
 N2=$(ensure_asset "$NET_CID" vpn-gw-02   10.30.30.12 "$VPN_BENCH" "os:appliance,site:dr")

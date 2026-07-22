@@ -27,6 +27,37 @@ spec.loader.exec_module(ent)
 DS, col = ent.DS, ent.col
 API = "http://stigman:54000/api"
 OUT = HERE.parent / "grafana" / "dashboards-cyber"
+LQ = "${label:raw}"   # repeated labelId=<uuid> params
+
+def label_variable(collection_var="$collection"):
+    """Label filter (single label or All), auto-refreshed from the
+    collection's labels — new labels appear on dashboard load.
+
+    The option VALUE is a ready-made query fragment ("labelId=<uuid>")
+    because Grafana cannot emit repeated query params from a multi-value
+    variable; "All" maps to the no-op fragment "format=json" so the URL
+    stays valid with no label filter applied."""
+    return {
+        "name": "label", "label": "Label", "type": "query",
+        "datasource": {"type": "yesoreyeram-infinity-datasource",
+                       "uid": "stigmanager-infinity"},
+        "refresh": 2, "multi": False, "includeAll": True,
+        "allValue": "format=json", "sort": 1,
+        "query": {"queryType": "infinity", "query": "", "infinityQuery": {
+            "refId": "variable", "queryType": "infinity", "type": "json",
+            "source": "url", "format": "table", "parser": "backend",
+            "url": f"http://stigman:54000/api/collections/{collection_var}/labels",
+            "url_options": {"method": "GET", "data": ""},
+            "root_selector": "",
+            "columns": [
+                {"selector": "name", "text": "__text", "type": "string"},
+                {"selector": "labelId", "text": "labelId", "type": "string"}],
+            "computed_columns": [{"selector": "'labelId=' + labelId",
+                                  "text": "__value", "type": "string"}]}},
+        "current": {"selected": True, "text": "All", "value": "$__all"},
+        "options": [],
+    }
+
 
 SEVERITY_MAPPINGS = [{"type": "value", "options": {
     "high": {"text": "CAT 1", "color": ent.CAT1_COLOR, "index": 0},
@@ -258,17 +289,17 @@ SUMMARY = f"{API}/collections/$collection/metrics/summary"
 panels = [
     sev_tiles({"h": 4, "w": 8, "x": 0, "y": 0},
               "Open findings by severity — $collection",
-              f"{SUMMARY}/collection",
+              f"{SUMMARY}/collection?{LQ}",
               desc="Colors match the STIG Manager UI."),
     status_tiles({"h": 4, "w": 10, "x": 8, "y": 0},
                  "Review workflow status — $collection",
-                 f"{SUMMARY}/collection",
+                 f"{SUMMARY}/collection?{LQ}",
                  desc="Where reviews sit in the workflow."),
     ent.review_age_tiles({"h": 4, "w": 6, "x": 18, "y": 0},
-                         "Review ages", f"{SUMMARY}/collection"),
+                         "Review ages", f"{SUMMARY}/collection?{LQ}"),
     posture_table(
         {"h": 8, "w": 24, "x": 0, "y": 4}, "Posture by STIG benchmark",
-        f"{SUMMARY}/stig",
+        f"{SUMMARY}/stig?{LQ}",
         [col("benchmarkId", "STIG", "string"),
          col("revisionStr", "Rev", "string"),
          col("assets", "Assets")],
@@ -278,14 +309,14 @@ panels = [
              "worst-risk first. Columns are filterable."),
     posture_table(
         {"h": 8, "w": 24, "x": 0, "y": 12}, "Posture by asset",
-        f"{SUMMARY}/asset",
+        f"{SUMMARY}/asset?{LQ}",
         [col("name", "Asset", "string"), col("ip", "IP", "string")],
         {"name": "Asset"},
         desc="Every asset in this collection. Use the Asset deep-dive "
              "dashboard (top-right link) for a single asset."),
     posture_table(
         {"h": 7, "w": 24, "x": 0, "y": 20}, "Posture by label",
-        f"{SUMMARY}/label",
+        f"{SUMMARY}/label?{LQ}",
         [col("name", "Label", "string"), col("assets", "Assets")],
         {"name": "Label"},
         desc="Posture pivoted by collection label (site, OS, department...). "
@@ -296,14 +327,15 @@ panels = [
         f"{API}/collections/$collection/findings?aggregator=ruleId&acceptedOnly=false",
         desc="Open findings aggregated by rule across the collection — the "
              "remediation hit list. 'Failing assets' = how many assets fail "
-             "this rule.",
+             "this rule. NOTE: the Labels filter does not apply here (the "
+             "findings API has no label parameter).",
         extra_cols=[col("assetCount", "Failing assets")]),
 ]
 drilldown = base(
     "stig-cyber-drilldown", "STIG Posture — Cyber Drilldown",
     "Analyst drill-down for one collection: pivot posture by STIG, asset "
     "and label, then rank failing rules. Live read-only API data.",
-    panels, [collection_variable()])
+    panels, [collection_variable(), label_variable()])
 
 # ======================================================================
 # Dashboard B: asset deep dive
@@ -318,7 +350,7 @@ asset_var = {
     "query": {"queryType": "infinity", "query": "", "infinityQuery": {
         "refId": "variable", "queryType": "infinity", "type": "json",
         "source": "url", "format": "table", "parser": "backend",
-        "url": ASSET_URL,
+        "url": f"{ASSET_URL}?{LQ}",
         "url_options": {"method": "GET", "data": ""},
         "root_selector": "",
         "columns": [
@@ -417,7 +449,7 @@ asset_dash = base(
     "stig-cyber-asset", "STIG Posture — Cyber Asset Deep Dive",
     "Single-asset analysis: posture, risk, workflow status, per-STIG "
     "breakdown and the asset's failing rules.",
-    apanels, [collection_variable(), asset_var])
+    apanels, [collection_variable(), label_variable(), asset_var])
 
 OUT.mkdir(exist_ok=True)
 for dash, name in ((drilldown, "stig-cyber-drilldown.json"),

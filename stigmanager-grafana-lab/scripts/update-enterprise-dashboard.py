@@ -188,6 +188,13 @@ STATUS_TILE_COLORS = [("Unassessed", UNASSESSED_COLOR),
                       ("Rejected", REJECTED_COLOR)]
 
 
+# Review-age tiles use one color family (the UI's periwinkle) in three
+# shades that encode time depth: darkest = Oldest, mid = Updated,
+# lightest = Newest.
+AGE_TILE_COLORS = [("Oldest", "#8791bd"), ("Newest", "#cdd2ea"),
+                   ("Updated", "#aeb8dc")]
+
+
 def review_age_tiles(grid, title, url, filter_expr=None, id_col=None,
                      desc=""):
     """Native-UI style Review Ages tiles: Oldest / Newest / Updated."""
@@ -198,9 +205,13 @@ def review_age_tiles(grid, title, url, filter_expr=None, id_col=None,
         cols.append(id_col)
     return {
         "type": "stat", "title": title, "gridPos": grid, "datasource": DS,
-        "description": desc or ("Review ages, like the STIG Manager UI: "
-                                "Oldest/Newest = first/last review result, "
-                                "Updated = most recent touch."),
+        "description": desc or (
+            "Review ages, like the STIG Manager UI. "
+            "Oldest = the least recently evaluated review (stale checks "
+            "hide risk); Newest = the most recent review result; "
+            "Updated = the last time anything was touched, including "
+            "status changes. Shades of one color encode time depth: "
+            "darkest = Oldest, lightest = Newest."),
         "targets": [query("A", url, cols, filter_expr=filter_expr)],
         "transformations": [
             {"id": "filterFieldsByName", "options": {
@@ -212,13 +223,14 @@ def review_age_tiles(grid, title, url, filter_expr=None, id_col=None,
                 "fields": {}}}],
         "options": {"reduceOptions": {"values": False,
                                       "calcs": ["lastNotNull"]},
-                    "colorMode": "value", "graphMode": "none",
+                    "colorMode": "background", "graphMode": "none",
                     "justifyMode": "auto", "orientation": "auto",
                     "textMode": "value_and_name", "wideLayout": True},
         "fieldConfig": {"defaults": {"unit": "dateTimeFromNow",
                                      "thresholds": NEUTRAL_THRESHOLDS,
                                      "color": {"mode": "thresholds"}},
-                        "overrides": []},
+                        "overrides": [color_override(n, c)
+                                      for n, c in AGE_TILE_COLORS]},
     }
 
 

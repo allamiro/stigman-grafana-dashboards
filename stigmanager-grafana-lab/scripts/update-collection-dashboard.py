@@ -19,7 +19,42 @@ spec.loader.exec_module(ent)
 
 DS, col = ent.DS, ent.col
 API = "http://stigman:54000/api"
-SUMMARY_URL = f"{API}/collections/$collection/metrics/summary/collection"
+# ${label:raw} expands to "labelId=<uuid>" (or "format=json" for All);
+# see label_variable() for why.
+LQ = "${label:raw}"
+SUMMARY_URL = f"{API}/collections/$collection/metrics/summary/collection?{LQ}"
+
+
+
+
+def label_variable(collection_var="$collection"):
+    """Label filter (single label or All), auto-refreshed from the
+    collection's labels — new labels appear on dashboard load.
+
+    The option VALUE is a ready-made query fragment ("labelId=<uuid>")
+    because Grafana cannot emit repeated query params from a multi-value
+    variable; "All" maps to the no-op fragment "format=json" so the URL
+    stays valid with no label filter applied."""
+    return {
+        "name": "label", "label": "Label", "type": "query",
+        "datasource": {"type": "yesoreyeram-infinity-datasource",
+                       "uid": "stigmanager-infinity"},
+        "refresh": 2, "multi": False, "includeAll": True,
+        "allValue": "format=json", "sort": 1,
+        "query": {"queryType": "infinity", "query": "", "infinityQuery": {
+            "refId": "variable", "queryType": "infinity", "type": "json",
+            "source": "url", "format": "table", "parser": "backend",
+            "url": f"http://stigman:54000/api/collections/{collection_var}/labels",
+            "url_options": {"method": "GET", "data": ""},
+            "root_selector": "",
+            "columns": [
+                {"selector": "name", "text": "__text", "type": "string"},
+                {"selector": "labelId", "text": "labelId", "type": "string"}],
+            "computed_columns": [{"selector": "'labelId=' + labelId",
+                                  "text": "__value", "type": "string"}]}},
+        "current": {"selected": True, "text": "All", "value": "$__all"},
+        "options": [],
+    }
 
 
 def q(columns, computed=None):
@@ -132,7 +167,9 @@ dashboard = {
     "title": "STIG Posture — Per Collection",
     "description": "Security posture for a single STIG Manager collection, "
                    "fed by the STIG Manager API via the Infinity datasource "
-                   "(service account: nexus-reporter, read-only).",
+                   "(service account: nexus-reporter, read-only). The Label "
+                   "filter narrows every panel to assets carrying that "
+                   "label (single label or All).",
     "tags": ["stig", "posture", "collection"],
     "timezone": "browser",
     "editable": True,
@@ -170,7 +207,8 @@ dashboard = {
                     {"selector": "collectionId", "text": "__value",
                      "type": "string"}]}},
         "current": {},
-        "options": []}]},
+        "options": []},
+        label_variable()]},
     "annotations": {"list": []},
     "links": [],
     "panels": panels,

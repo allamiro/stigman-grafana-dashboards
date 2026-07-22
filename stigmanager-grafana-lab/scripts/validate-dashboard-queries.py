@@ -41,6 +41,8 @@ def substitute(target, cids, asset_id="1"):
     s = s.replace("${collections}", cids[0])
     s = s.replace("$collection", cids[0])
     s = s.replace("${asset:text}", "substituted")
+    s = s.replace("${labelId:queryparam}", "")
+    s = s.replace("${label:raw}", "format=json")
     s = s.replace("$asset", asset_id)
     return json.loads(s)
 

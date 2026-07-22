@@ -65,6 +65,63 @@
         },
         "current": {},
         "options": []
+      },
+      {
+        "name": "label",
+        "label": "Label",
+        "type": "query",
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "stigmanager-infinity"
+        },
+        "refresh": 2,
+        "multi": false,
+        "includeAll": true,
+        "allValue": "format=json",
+        "sort": 1,
+        "query": {
+          "queryType": "infinity",
+          "query": "",
+          "infinityQuery": {
+            "refId": "variable",
+            "queryType": "infinity",
+            "type": "json",
+            "source": "url",
+            "format": "table",
+            "parser": "backend",
+            "url": "http://stigman:54000/api/collections/$collection/labels",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
+            "root_selector": "",
+            "columns": [
+              {
+                "selector": "name",
+                "text": "__text",
+                "type": "string"
+              },
+              {
+                "selector": "labelId",
+                "text": "labelId",
+                "type": "string"
+              }
+            ],
+            "computed_columns": [
+              {
+                "selector": "'labelId=' + labelId",
+                "text": "__value",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "options": []
       }
     ]
   },
@@ -122,7 +179,7 @@
           "source": "url",
           "format": "table",
           "parser": "backend",
-          "url": "http://stigman:54000/api/collections/$collection/metrics/summary/collection",
+          "url": "http://stigman:54000/api/collections/$collection/metrics/summary/collection?${label:raw}",
           "url_options": {
             "method": "GET",
             "data": ""
@@ -273,7 +330,7 @@
           "source": "url",
           "format": "table",
           "parser": "backend",
-          "url": "http://stigman:54000/api/collections/$collection/metrics/summary/collection",
+          "url": "http://stigman:54000/api/collections/$collection/metrics/summary/collection?${label:raw}",
           "url_options": {
             "method": "GET",
             "data": ""
@@ -460,7 +517,7 @@
         "type": "yesoreyeram-infinity-datasource",
         "uid": "stigmanager-infinity"
       },
-      "description": "Review ages, like the STIG Manager UI: Oldest/Newest = first/last review result, Updated = most recent touch.",
+      "description": "Review ages, like the STIG Manager UI. Oldest = the least recently evaluated review (stale checks hide risk); Newest = the most recent review result; Updated = the last time anything was touched, including status changes. Shades of one color encode time depth: darkest = Oldest, lightest = Newest.",
       "targets": [
         {
           "refId": "A",
@@ -473,7 +530,7 @@
           "source": "url",
           "format": "table",
           "parser": "backend",
-          "url": "http://stigman:54000/api/collections/$collection/metrics/summary/collection",
+          "url": "http://stigman:54000/api/collections/$collection/metrics/summary/collection?${label:raw}",
           "url_options": {
             "method": "GET",
             "data": ""
@@ -539,7 +596,7 @@
             "lastNotNull"
           ]
         },
-        "colorMode": "value",
+        "colorMode": "background",
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
@@ -562,7 +619,53 @@
             "mode": "thresholds"
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Oldest"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#8791bd"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Newest"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#cdd2ea"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Updated"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#aeb8dc"
+                }
+              }
+            ]
+          }
+        ]
       },
       "id": 3
     },
@@ -592,7 +695,7 @@
           "source": "url",
           "format": "table",
           "parser": "backend",
-          "url": "http://stigman:54000/api/collections/$collection/metrics/summary/stig",
+          "url": "http://stigman:54000/api/collections/$collection/metrics/summary/stig?${label:raw}",
           "url_options": {
             "method": "GET",
             "data": ""
@@ -1122,7 +1225,7 @@
           "source": "url",
           "format": "table",
           "parser": "backend",
-          "url": "http://stigman:54000/api/collections/$collection/metrics/summary/asset",
+          "url": "http://stigman:54000/api/collections/$collection/metrics/summary/asset?${label:raw}",
           "url_options": {
             "method": "GET",
             "data": ""
@@ -1646,7 +1749,7 @@
           "source": "url",
           "format": "table",
           "parser": "backend",
-          "url": "http://stigman:54000/api/collections/$collection/metrics/summary/label",
+          "url": "http://stigman:54000/api/collections/$collection/metrics/summary/label?${label:raw}",
           "url_options": {
             "method": "GET",
             "data": ""
@@ -2147,7 +2250,7 @@
     {
       "type": "table",
       "title": "Top failing rules (most widespread first)",
-      "description": "Open findings aggregated by rule across the collection \u2014 the remediation hit list. 'Failing assets' = how many assets fail this rule.",
+      "description": "Open findings aggregated by rule across the collection \u2014 the remediation hit list. 'Failing assets' = how many assets fail this rule. NOTE: the Labels filter does not apply here (the findings API has no label parameter).",
       "gridPos": {
         "h": 10,
         "w": 24,
