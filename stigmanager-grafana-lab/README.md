@@ -383,6 +383,13 @@ Rules when changing versions:
   datasource `allowedHosts` and the dashboard query URLs — otherwise
   Infinity rejects the request ("requested URL not allowed"). With the same
   hostname, nothing changes on the Grafana side.
+* **Browser login to the parallel instance** needs its redirect URI added
+  to the Keycloak `stig-manager` client (otherwise Keycloak shows
+  *Invalid parameter: redirect_uri*): admin console → Clients →
+  `stig-manager` → add `http://localhost:54001/*` to *Valid redirect URIs*
+  and `http://localhost:54001` to *Web origins*. API/token calls need no
+  change — only the browser flow uses redirects. Note this is a live
+  Keycloak change; a realm re-import reverts it.
 * Versions **older than the 1.5.9-era releases** may lack the
   `assessmentsBySeverity`/`assessedBySeverity` fields (CORA gauges) or the
   grantId/ACL model — check `GET /api/op/definition` first.
