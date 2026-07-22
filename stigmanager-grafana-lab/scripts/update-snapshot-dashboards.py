@@ -257,10 +257,11 @@ def base(uid, title, desc, tags, panels, templating=None):
     }
 
 
-ENT_COVERAGE = ("sum(stigman_collection_assessed) / "
-                "clamp_min(sum(stigman_collection_assessments), 1) * 100")
-ENT_COMPLIANCE = ('sum(stigman_collection_results{result="pass"}) / '
-                  "clamp_min(sum(stigman_collection_assessed), 1) * 100")
+OC = "$collection"   # overview multi-select (All by default)
+ENT_COVERAGE = (f"sum(stigman_collection_assessed{csel(OC)}) / "
+                f"clamp_min(sum(stigman_collection_assessments{csel(OC)}), 1) * 100")
+ENT_COMPLIANCE = (f'sum(stigman_collection_results{rsel("pass", OC)}) / '
+                  f"clamp_min(sum(stigman_collection_assessed{csel(OC)}), 1) * 100")
 
 # ======================================================================
 # Dashboard 1: Review Snapshot — all collections
@@ -280,13 +281,13 @@ panels = [{
 }]
 
 panels.append(stat({"h": 6, "w": 7, "x": 0, "y": 4}, "Bottom line",
-                   cora_expr(), "none", CORA_THRESHOLDS,
+                   cora_expr(OC), "none", CORA_THRESHOLDS,
                    color_mode="background", mappings=RISK_MAPPINGS,
                    desc="CORA-style weighted risk verdict as of the selected "
                         "point in time."))
 panels.append(stat({"h": 6, "w": 5, "x": 7, "y": 4},
                    "Critical findings — target 0",
-                   sev_sum("stigman_collection_findings", "high"), "none",
+                   sev_sum("stigman_collection_findings", "high", OC), "none",
                    ALERT_THRESHOLDS, decimals=0, color_mode="background",
                    desc="Open CAT I findings."))
 panels.append(stat({"h": 6, "w": 4, "x": 12, "y": 4},
@@ -297,12 +298,12 @@ panels.append(stat({"h": 6, "w": 4, "x": 16, "y": 4},
                    COVERAGE_THRESHOLDS,
                    desc="sum(assessed)/sum(assessments)."))
 panels.append(stat({"h": 6, "w": 4, "x": 20, "y": 4}, "Open findings",
-                   'sum(stigman_collection_results{result="fail"})', "none",
+                   f'sum(stigman_collection_results{rsel("fail", OC)})', "none",
                    ALERT_THRESHOLDS, decimals=0,
                    desc="All open failed checks."))
 
 panels.append(donut({"h": 9, "w": 8, "x": 0, "y": 10},
-                    "Security posture — all collections",
+                    "Security posture — selected collections", coll=OC,
                     desc="Compliant / Not Applicable / Open Findings / "
                          "Not Assessed as of the selected point in time."))
 
@@ -313,14 +314,14 @@ panels.append({
     "description": "As of the selected point in time.",
     "gridPos": {"h": 9, "w": 10, "x": 8, "y": 10}, "datasource": DS,
     "targets": [
-        target('sum by (collection_name) '
-               '(stigman_collection_findings{severity="high"})',
+        target('sum by (collection_name) (stigman_collection_findings'
+               '{severity="high",collection_name=~"$collection"})',
                "", "A", fmt="table"),
-        target('sum by (collection_name) '
-               '(stigman_collection_findings{severity="medium"})',
+        target('sum by (collection_name) (stigman_collection_findings'
+               '{severity="medium",collection_name=~"$collection"})',
                "", "B", fmt="table"),
-        target('sum by (collection_name) '
-               '(stigman_collection_findings{severity="low"})',
+        target('sum by (collection_name) (stigman_collection_findings'
+               '{severity="low",collection_name=~"$collection"})',
                "", "C", fmt="table")],
     "transformations": [
         {"id": "joinByField",
@@ -351,7 +352,7 @@ panels.append({
 })
 
 panels.append(gauge({"h": 9, "w": 6, "x": 18, "y": 10},
-                    "Enterprise CORA risk score", cora_expr(),
+                    "Enterprise CORA risk score", cora_expr(OC),
                     CORA_THRESHOLDS,
                     desc="Aggregated-first CORA-style score as of the "
                          "selected point in time."))
@@ -362,18 +363,21 @@ panels.append({
     "description": "Per-collection posture as of the selected point in time.",
     "gridPos": {"h": 7, "w": 24, "x": 0, "y": 19}, "datasource": DS,
     "targets": [
-        target("stigman_collection_cora_percent", "", "A", fmt="table"),
-        target('sum by (collection_name) '
-               '(stigman_collection_findings{severity="high"})',
+        target('stigman_collection_cora_percent{collection_name=~"$collection"}',
+               "", "A", fmt="table"),
+        target('sum by (collection_name) (stigman_collection_findings'
+               '{severity="high",collection_name=~"$collection"})',
                "", "B", fmt="table"),
-        target('sum by (collection_name) '
-               '(stigman_collection_results{result="fail"})',
+        target('sum by (collection_name) (stigman_collection_results'
+               '{result="fail",collection_name=~"$collection"})',
                "", "C", fmt="table"),
-        target("sum by (collection_name) (stigman_collection_assessed) / "
-               "clamp_min(sum by (collection_name) "
-               "(stigman_collection_assessments), 1) * 100",
+        target('sum by (collection_name) (stigman_collection_assessed'
+               '{collection_name=~"$collection"}) / '
+               'clamp_min(sum by (collection_name) (stigman_collection_assessments'
+               '{collection_name=~"$collection"}), 1) * 100',
                "", "D", fmt="table"),
-        target("sum by (collection_name) (stigman_collection_assets)",
+        target('sum by (collection_name) (stigman_collection_assets'
+               '{collection_name=~"$collection"})',
                "", "E", fmt="table")],
     "transformations": [
         {"id": "joinByField",
@@ -435,7 +439,8 @@ rep_var = {
     "options": [],
 }
 panels.append(status_tiles({"h": 4, "w": 24, "x": 0, "y": 26},
-                            "Review workflow status (all collections)",
+                            "Review workflow status (selected collections)",
+                            coll=OC,
                             desc="Where reviews sit in the workflow. Colors "
                                  "match the STIG Manager UI."))
 

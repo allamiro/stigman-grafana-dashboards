@@ -90,6 +90,28 @@ CORA_SUM_EXPR = (
     " + (sum(assessmentsLow) > 0 ? (sum(low) + sum(assessmentsLow) - sum(assessedLow)) / sum(assessmentsLow) : 0) * 1) / 15 * 100")
 
 
+def collections_variable():
+    """Multi-select collection filter (default All) so test collections can
+    be excluded from any aggregate dashboard."""
+    return {
+        "name": "collections", "label": "Collections", "type": "query",
+        "datasource": DS, "refresh": 1, "multi": True, "includeAll": True,
+        "sort": 1,
+        "query": {"queryType": "infinity", "query": "", "infinityQuery": {
+            "refId": "variable", "queryType": "infinity", "type": "json",
+            "source": "url", "format": "table", "parser": "backend",
+            "url": f"{API}/collections",
+            "url_options": {"method": "GET", "data": ""},
+            "root_selector": "",
+            "columns": [
+                {"selector": "name", "text": "__text", "type": "string"},
+                {"selector": "collectionId", "text": "__value",
+                 "type": "string"}]}},
+        "current": {"selected": True, "text": ["All"], "value": ["$__all"]},
+        "options": [],
+    }
+
+
 def query(refid, url, columns, computed=None, filter_expr=FILTER,
           summarize=None, alias=None):
     q = {

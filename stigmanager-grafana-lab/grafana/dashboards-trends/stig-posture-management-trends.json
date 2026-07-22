@@ -21,7 +21,36 @@
     "to": "now"
   },
   "templating": {
-    "list": []
+    "list": [
+      {
+        "name": "collection",
+        "label": "Collections",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "stigmanager-prometheus"
+        },
+        "refresh": 2,
+        "multi": true,
+        "includeAll": true,
+        "sort": 1,
+        "query": {
+          "qryType": 1,
+          "query": "label_values(stigman_collection_assessments, collection_name)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "options": []
+      }
+    ]
   },
   "annotations": {
     "list": []
@@ -96,7 +125,7 @@
             "type": "prometheus",
             "uid": "stigmanager-prometheus"
           },
-          "expr": "(((sum(stigman_collection_findings{severity=\"high\"}) + sum(stigman_collection_assessments_by_severity{severity=\"high\"}) - sum(stigman_collection_assessed_by_severity{severity=\"high\"})) / clamp_min(sum(stigman_collection_assessments_by_severity{severity=\"high\"}), 1)) * 10 + ((sum(stigman_collection_findings{severity=\"medium\"}) + sum(stigman_collection_assessments_by_severity{severity=\"medium\"}) - sum(stigman_collection_assessed_by_severity{severity=\"medium\"})) / clamp_min(sum(stigman_collection_assessments_by_severity{severity=\"medium\"}), 1)) * 4 + ((sum(stigman_collection_findings{severity=\"low\"}) + sum(stigman_collection_assessments_by_severity{severity=\"low\"}) - sum(stigman_collection_assessed_by_severity{severity=\"low\"})) / clamp_min(sum(stigman_collection_assessments_by_severity{severity=\"low\"}), 1)) * 1) / 15 * 100",
+          "expr": "(((sum(stigman_collection_findings{severity=\"high\",collection_name=~\"$collection\"}) + sum(stigman_collection_assessments_by_severity{severity=\"high\",collection_name=~\"$collection\"}) - sum(stigman_collection_assessed_by_severity{severity=\"high\",collection_name=~\"$collection\"})) / clamp_min(sum(stigman_collection_assessments_by_severity{severity=\"high\",collection_name=~\"$collection\"}), 1)) * 10 + ((sum(stigman_collection_findings{severity=\"medium\",collection_name=~\"$collection\"}) + sum(stigman_collection_assessments_by_severity{severity=\"medium\",collection_name=~\"$collection\"}) - sum(stigman_collection_assessed_by_severity{severity=\"medium\",collection_name=~\"$collection\"})) / clamp_min(sum(stigman_collection_assessments_by_severity{severity=\"medium\",collection_name=~\"$collection\"}), 1)) * 4 + ((sum(stigman_collection_findings{severity=\"low\",collection_name=~\"$collection\"}) + sum(stigman_collection_assessments_by_severity{severity=\"low\",collection_name=~\"$collection\"}) - sum(stigman_collection_assessed_by_severity{severity=\"low\",collection_name=~\"$collection\"})) / clamp_min(sum(stigman_collection_assessments_by_severity{severity=\"low\",collection_name=~\"$collection\"}), 1)) * 1) / 15 * 100",
           "editorMode": "code",
           "legendFormat": "__auto",
           "range": true,
@@ -221,7 +250,7 @@
             "type": "prometheus",
             "uid": "stigmanager-prometheus"
           },
-          "expr": "sum(stigman_collection_findings{severity=\"high\"})",
+          "expr": "sum(stigman_collection_findings{severity=\"high\",collection_name=~\"$collection\"})",
           "editorMode": "code",
           "legendFormat": "__auto",
           "range": true,
@@ -288,7 +317,7 @@
             "type": "prometheus",
             "uid": "stigmanager-prometheus"
           },
-          "expr": "sum(stigman_collection_results{result=\"pass\"}) / clamp_min(sum(stigman_collection_assessed), 1) * 100",
+          "expr": "sum(stigman_collection_results{result=\"pass\",collection_name=~\"$collection\"}) / clamp_min(sum(stigman_collection_assessed{collection_name=~\"$collection\"}), 1) * 100",
           "editorMode": "code",
           "legendFormat": "__auto",
           "range": true,
@@ -359,7 +388,7 @@
             "type": "prometheus",
             "uid": "stigmanager-prometheus"
           },
-          "expr": "sum(stigman_collection_assessed) / clamp_min(sum(stigman_collection_assessments), 1) * 100",
+          "expr": "sum(stigman_collection_assessed{collection_name=~\"$collection\"}) / clamp_min(sum(stigman_collection_assessments{collection_name=~\"$collection\"}), 1) * 100",
           "editorMode": "code",
           "legendFormat": "__auto",
           "range": true,
@@ -430,7 +459,7 @@
             "type": "prometheus",
             "uid": "stigmanager-prometheus"
           },
-          "expr": "sum(stigman_collection_results{result=\"fail\"})",
+          "expr": "sum(stigman_collection_results{result=\"fail\",collection_name=~\"$collection\"})",
           "editorMode": "code",
           "legendFormat": "__auto",
           "range": true,
@@ -497,7 +526,7 @@
             "type": "prometheus",
             "uid": "stigmanager-prometheus"
           },
-          "expr": "sum(stigman_collection_assessed) / clamp_min(sum(stigman_collection_assessments), 1) * 100",
+          "expr": "sum(stigman_collection_assessed{collection_name=~\"$collection\"}) / clamp_min(sum(stigman_collection_assessments{collection_name=~\"$collection\"}), 1) * 100",
           "editorMode": "code",
           "legendFormat": "Coverage %",
           "range": true,
@@ -509,7 +538,7 @@
             "type": "prometheus",
             "uid": "stigmanager-prometheus"
           },
-          "expr": "sum(stigman_collection_results{result=\"pass\"}) / clamp_min(sum(stigman_collection_assessed), 1) * 100",
+          "expr": "sum(stigman_collection_results{result=\"pass\",collection_name=~\"$collection\"}) / clamp_min(sum(stigman_collection_assessed{collection_name=~\"$collection\"}), 1) * 100",
           "editorMode": "code",
           "legendFormat": "Compliance %",
           "range": true,
@@ -616,7 +645,7 @@
             "type": "prometheus",
             "uid": "stigmanager-prometheus"
           },
-          "expr": "(((sum(stigman_collection_findings{severity=\"high\"}) + sum(stigman_collection_assessments_by_severity{severity=\"high\"}) - sum(stigman_collection_assessed_by_severity{severity=\"high\"})) / clamp_min(sum(stigman_collection_assessments_by_severity{severity=\"high\"}), 1)) * 10 + ((sum(stigman_collection_findings{severity=\"medium\"}) + sum(stigman_collection_assessments_by_severity{severity=\"medium\"}) - sum(stigman_collection_assessed_by_severity{severity=\"medium\"})) / clamp_min(sum(stigman_collection_assessments_by_severity{severity=\"medium\"}), 1)) * 4 + ((sum(stigman_collection_findings{severity=\"low\"}) + sum(stigman_collection_assessments_by_severity{severity=\"low\"}) - sum(stigman_collection_assessed_by_severity{severity=\"low\"})) / clamp_min(sum(stigman_collection_assessments_by_severity{severity=\"low\"}), 1)) * 1) / 15 * 100",
+          "expr": "(((sum(stigman_collection_findings{severity=\"high\",collection_name=~\"$collection\"}) + sum(stigman_collection_assessments_by_severity{severity=\"high\",collection_name=~\"$collection\"}) - sum(stigman_collection_assessed_by_severity{severity=\"high\",collection_name=~\"$collection\"})) / clamp_min(sum(stigman_collection_assessments_by_severity{severity=\"high\",collection_name=~\"$collection\"}), 1)) * 10 + ((sum(stigman_collection_findings{severity=\"medium\",collection_name=~\"$collection\"}) + sum(stigman_collection_assessments_by_severity{severity=\"medium\",collection_name=~\"$collection\"}) - sum(stigman_collection_assessed_by_severity{severity=\"medium\",collection_name=~\"$collection\"})) / clamp_min(sum(stigman_collection_assessments_by_severity{severity=\"medium\",collection_name=~\"$collection\"}), 1)) * 4 + ((sum(stigman_collection_findings{severity=\"low\",collection_name=~\"$collection\"}) + sum(stigman_collection_assessments_by_severity{severity=\"low\",collection_name=~\"$collection\"}) - sum(stigman_collection_assessed_by_severity{severity=\"low\",collection_name=~\"$collection\"})) / clamp_min(sum(stigman_collection_assessments_by_severity{severity=\"low\",collection_name=~\"$collection\"}), 1)) * 1) / 15 * 100",
           "editorMode": "code",
           "legendFormat": "Enterprise risk %",
           "range": true,
@@ -628,7 +657,7 @@
             "type": "prometheus",
             "uid": "stigmanager-prometheus"
           },
-          "expr": "stigman_collection_cora_percent",
+          "expr": "stigman_collection_cora_percent{collection_name=~\"$collection\"}",
           "editorMode": "code",
           "legendFormat": "{{collection_name}}",
           "range": true,
@@ -864,7 +893,7 @@
             "type": "prometheus",
             "uid": "stigmanager-prometheus"
           },
-          "expr": "sum(stigman_collection_assessments) - sum(stigman_collection_assessed)",
+          "expr": "sum(stigman_collection_assessments{collection_name=~\"$collection\"}) - sum(stigman_collection_assessed{collection_name=~\"$collection\"})",
           "editorMode": "code",
           "legendFormat": "Unassessed checks",
           "range": true,

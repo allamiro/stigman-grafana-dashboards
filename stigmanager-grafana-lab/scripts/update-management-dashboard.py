@@ -49,8 +49,11 @@ RISK_MAPPINGS = [
 
 
 def q(columns, summarize=None, alias=None, computed=None):
-    return ent.query("A", META_URL, columns, computed=computed,
-                     filter_expr=None, summarize=summarize, alias=alias)
+    cols = list(columns)
+    if not any(c["text"] == "collectionId" for c in cols):
+        cols.append(col("collectionId", "collectionId", "string"))
+    return ent.query("A", META_URL, cols, computed=computed,
+                     filter_expr=ent.FILTER, summarize=summarize, alias=alias)
 
 
 def stat(grid, title, query, unit, thresholds, decimals=0, desc="",
@@ -73,6 +76,8 @@ def severity_bars(grid, title, target, desc):
     return {
         "type": "stat", "title": title, "description": desc,
         "gridPos": grid, "datasource": DS, "targets": [target],
+        "transformations": [{"id": "filterFieldsByName", "options": {
+            "include": {"names": [n for n, _ in SEVERITY_COLORS]}}}],
         "options": {"reduceOptions": {"values": False,
                                       "calcs": ["lastNotNull"]},
                     "colorMode": "background", "graphMode": "none",
@@ -106,6 +111,8 @@ _fresh = ent.stat(
     desc="Most recent review activity (maxTouchTs) across all environments. "
          "If this is old, the posture shown here is equally old.")
 _fresh["transformations"] = [
+    {"id": "filterFieldsByName",
+     "options": {"include": {"names": ["Last activity"]}}},
     {"id": "sortBy", "options": {
         "fields": {}, "sort": [{"field": "Last activity", "desc": False}]}},
     # stat panels reduce numeric fields only: convert time -> epoch ms
@@ -163,11 +170,10 @@ panels.append(stat(
 # ======== TIER 2 — what's driving it ====================================
 panels.append(ent.donut(
     {"h": 9, "w": 8, "x": 0, "y": 10},
-    "Driver 1 — posture mix (all checks)", META_URL,
+    "Driver 1 — posture mix (selected collections)", META_URL,
     desc="Composition of every required check: passed (green), open "
          "findings (red), not applicable (blue), not yet assessed "
          "(orange). A large orange share means the picture is incomplete."))
-panels[-1]["targets"][0].pop("filterExpression", None)
 
 panels.append(severity_bars(
     {"h": 9, "w": 8, "x": 8, "y": 10},
@@ -273,7 +279,7 @@ dashboard = {
     "version": 1,
     "refresh": "5m",
     "time": {"from": "now-6h", "to": "now"},
-    "templating": {"list": []},
+    "templating": {"list": [ent.collections_variable()]},
     "annotations": {"list": []},
     "links": [
         {"title": "Details: Enterprise Overview", "type": "link", "icon": "dashboard",

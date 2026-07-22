@@ -49,12 +49,15 @@ RISK_MAPPINGS = [
 ]
 
 
-def sev_expr(scope):  # scope: "" (enterprise sums) or a by-clause selector
+MC = 'collection_name=~"$collection"'   # management-trends multi-select
+
+
+def sev_expr(scope):  # scope: "" (filtered enterprise sums) or per-collection
     def s(metric, sev):
         if scope == "collection":
             return (f'sum by (collection_name) ({metric}'
                     f'{{severity="{sev}"}})')
-        return f'sum({metric}{{severity="{sev}"}})'
+        return f'sum({metric}{{severity="{sev}",{MC}}})'
     parts = []
     for sev, w in (("high", 10), ("medium", 4), ("low", 1)):
         a = s("stigman_collection_assessments_by_severity", sev)
@@ -66,12 +69,12 @@ def sev_expr(scope):  # scope: "" (enterprise sums) or a by-clause selector
 
 ENT = {
     "cora": sev_expr(""),
-    "coverage": ("sum(stigman_collection_assessed) / "
-                 "clamp_min(sum(stigman_collection_assessments), 1) * 100"),
-    "compliance": ('sum(stigman_collection_results{result="pass"}) / '
-                   "clamp_min(sum(stigman_collection_assessed), 1) * 100"),
-    "open": 'sum(stigman_collection_results{result="fail"})',
-    "cat1": 'sum(stigman_collection_findings{severity="high"})',
+    "coverage": (f"sum(stigman_collection_assessed{{{MC}}}) / "
+                 f"clamp_min(sum(stigman_collection_assessments{{{MC}}}), 1) * 100"),
+    "compliance": (f'sum(stigman_collection_results{{result="pass",{MC}}}) / '
+                   f"clamp_min(sum(stigman_collection_assessed{{{MC}}}), 1) * 100"),
+    "open": f'sum(stigman_collection_results{{result="fail",{MC}}})',
+    "cat1": f'sum(stigman_collection_findings{{severity="high",{MC}}})',
 }
 
 
@@ -209,7 +212,8 @@ panels.append(timeseries(
 panels.append(timeseries(
     {"h": 9, "w": 12, "x": 12, "y": 9}, "Risk score over time",
     [target(ENT["cora"], "Enterprise risk %", "A"),
-     target("stigman_collection_cora_percent", "{{collection_name}}", "B")],
+     target('stigman_collection_cora_percent{collection_name=~"$collection"}',
+            "{{collection_name}}", "B")],
     "percent", desc="Enterprise CORA-style score plus each environment. "
                     "Down is good.",
     overrides=[name_override("Enterprise risk %", RED)]))
@@ -229,17 +233,28 @@ panels.append(timeseries(
 
 panels.append(timeseries(
     {"h": 9, "w": 12, "x": 12, "y": 18}, "Unassessed backlog over time",
-    [target("sum(stigman_collection_assessments) - "
-            "sum(stigman_collection_assessed)", "Unassessed checks", "A")],
+    [target('sum(stigman_collection_assessments{collection_name=~"$collection"}) - '
+            'sum(stigman_collection_assessed{collection_name=~"$collection"})',
+            "Unassessed checks", "A")],
     "none", desc="Checks not yet performed. Should trend toward zero as "
                  "coverage improves.",
     overrides=[name_override("Unassessed checks", ORANGE)]))
 
+mgmt_var = {
+    "name": "collection", "label": "Collections", "type": "query",
+    "datasource": DS, "refresh": 2, "multi": True, "includeAll": True,
+    "sort": 1,
+    "query": {"qryType": 1, "query":
+              "label_values(stigman_collection_assessments, collection_name)",
+              "refId": "PrometheusVariableQueryEditor-VariableQuery"},
+    "current": {"selected": True, "text": ["All"], "value": ["$__all"]},
+    "options": [],
+}
 mgmt = base(
     "stig-posture-management-trends",
     "STIG Posture — Management Review (Trends)",
     "Historical posture trends recorded by stigman-exporter into Prometheus.",
-    ["stig", "posture", "management", "trends"], panels)
+    ["stig", "posture", "management", "trends"], panels, [mgmt_var])
 
 # ======================================================================
 # Dashboard 2: Per Collection (Trends)

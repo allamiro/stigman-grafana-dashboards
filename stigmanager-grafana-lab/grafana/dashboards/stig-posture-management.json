@@ -20,7 +20,61 @@
     "to": "now"
   },
   "templating": {
-    "list": []
+    "list": [
+      {
+        "name": "collections",
+        "label": "Collections",
+        "type": "query",
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "stigmanager-infinity"
+        },
+        "refresh": 1,
+        "multi": true,
+        "includeAll": true,
+        "sort": 1,
+        "query": {
+          "queryType": "infinity",
+          "query": "",
+          "infinityQuery": {
+            "refId": "variable",
+            "queryType": "infinity",
+            "type": "json",
+            "source": "url",
+            "format": "table",
+            "parser": "backend",
+            "url": "http://stigman:54000/api/collections",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
+            "root_selector": "",
+            "columns": [
+              {
+                "selector": "name",
+                "text": "__text",
+                "type": "string"
+              },
+              {
+                "selector": "collectionId",
+                "text": "__value",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "options": []
+      }
+    ]
   },
   "annotations": {
     "list": []
@@ -111,8 +165,14 @@
               "selector": "metrics.maxTouchTs",
               "text": "Last activity",
               "type": "timestamp"
+            },
+            {
+              "selector": "collectionId",
+              "text": "collectionId",
+              "type": "string"
             }
-          ]
+          ],
+          "filterExpression": "collectionId IN (${collections:singlequote})"
         }
       ],
       "options": {
@@ -149,6 +209,16 @@
         "overrides": []
       },
       "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "Last activity"
+              ]
+            }
+          }
+        },
         {
           "id": "sortBy",
           "options": {
@@ -253,8 +323,14 @@
               "selector": "metrics.assessedBySeverity.low",
               "text": "assessedLow",
               "type": "number"
+            },
+            {
+              "selector": "collectionId",
+              "text": "collectionId",
+              "type": "string"
             }
           ],
+          "filterExpression": "collectionId IN (${collections:singlequote})",
           "summarizeExpression": "((sum(assessmentsHigh) > 0 ? (sum(high) + sum(assessmentsHigh) - sum(assessedHigh)) / sum(assessmentsHigh) : 0) * 10 + (sum(assessmentsMedium) > 0 ? (sum(medium) + sum(assessmentsMedium) - sum(assessedMedium)) / sum(assessmentsMedium) : 0) * 4 + (sum(assessmentsLow) > 0 ? (sum(low) + sum(assessmentsLow) - sum(assessedLow)) / sum(assessmentsLow) : 0) * 1) / 15 * 100",
           "summarizeAlias": "Risk"
         }
@@ -393,8 +469,14 @@
               "selector": "metrics.findings.high",
               "text": "high",
               "type": "number"
+            },
+            {
+              "selector": "collectionId",
+              "text": "collectionId",
+              "type": "string"
             }
           ],
+          "filterExpression": "collectionId IN (${collections:singlequote})",
           "summarizeExpression": "sum(high)",
           "summarizeAlias": "CAT I open"
         }
@@ -480,8 +562,14 @@
               "selector": "metrics.assessed",
               "text": "assessed",
               "type": "number"
+            },
+            {
+              "selector": "collectionId",
+              "text": "collectionId",
+              "type": "string"
             }
           ],
+          "filterExpression": "collectionId IN (${collections:singlequote})",
           "summarizeExpression": "sum(assessed) > 0 ? sum(pass) / sum(assessed) * 100 : 0",
           "summarizeAlias": "Compliance"
         }
@@ -571,8 +659,14 @@
               "selector": "metrics.assessed",
               "text": "assessed",
               "type": "number"
+            },
+            {
+              "selector": "collectionId",
+              "text": "collectionId",
+              "type": "string"
             }
           ],
+          "filterExpression": "collectionId IN (${collections:singlequote})",
           "summarizeExpression": "sum(assessments) > 0 ? sum(assessed) / sum(assessments) * 100 : 0",
           "summarizeAlias": "Coverage"
         }
@@ -657,8 +751,14 @@
               "selector": "metrics.results.fail",
               "text": "fail",
               "type": "number"
+            },
+            {
+              "selector": "collectionId",
+              "text": "collectionId",
+              "type": "string"
             }
           ],
+          "filterExpression": "collectionId IN (${collections:singlequote})",
           "summarizeExpression": "sum(fail)",
           "summarizeAlias": "Open findings"
         }
@@ -704,7 +804,7 @@
     },
     {
       "type": "piechart",
-      "title": "Driver 1 \u2014 posture mix (all checks)",
+      "title": "Driver 1 \u2014 posture mix (selected collections)",
       "description": "Composition of every required check: passed (green), open findings (red), not applicable (blue), not yet assessed (orange). A large orange share means the picture is incomplete.",
       "gridPos": {
         "h": 9,
@@ -772,7 +872,8 @@
               "text": "Not Assessed",
               "type": "number"
             }
-          ]
+          ],
+          "filterExpression": "collectionId IN (${collections:singlequote})"
         }
       ],
       "transformations": [
@@ -934,8 +1035,28 @@
               "selector": "metrics.findings.low",
               "text": "CAT III (low)",
               "type": "number"
+            },
+            {
+              "selector": "collectionId",
+              "text": "collectionId",
+              "type": "string"
             }
-          ]
+          ],
+          "filterExpression": "collectionId IN (${collections:singlequote})"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "CAT I (critical)",
+                "CAT II (medium)",
+                "CAT III (low)"
+              ]
+            }
+          }
         }
       ],
       "options": {
@@ -1081,6 +1202,11 @@
               "selector": "metrics.assessedBySeverity.low",
               "text": "sL",
               "type": "number"
+            },
+            {
+              "selector": "collectionId",
+              "text": "collectionId",
+              "type": "string"
             }
           ],
           "computed_columns": [
@@ -1099,7 +1225,22 @@
               "text": "CAT III (low)",
               "type": "number"
             }
-          ]
+          ],
+          "filterExpression": "collectionId IN (${collections:singlequote})"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "CAT I (critical)",
+                "CAT II (medium)",
+                "CAT III (low)"
+              ]
+            }
+          }
         }
       ],
       "options": {
@@ -1181,20 +1322,6 @@
           }
         ]
       },
-      "transformations": [
-        {
-          "id": "filterFieldsByName",
-          "options": {
-            "include": {
-              "names": [
-                "CAT I (critical)",
-                "CAT II (medium)",
-                "CAT III (low)"
-              ]
-            }
-          }
-        }
-      ],
       "id": 10
     },
     {
@@ -1299,6 +1426,11 @@
               "selector": "metrics.assessedBySeverity.low",
               "text": "assessedLow",
               "type": "number"
+            },
+            {
+              "selector": "collectionId",
+              "text": "collectionId",
+              "type": "string"
             }
           ],
           "computed_columns": [
@@ -1312,7 +1444,8 @@
               "text": "Risk score %",
               "type": "number"
             }
-          ]
+          ],
+          "filterExpression": "collectionId IN (${collections:singlequote})"
         }
       ],
       "transformations": [

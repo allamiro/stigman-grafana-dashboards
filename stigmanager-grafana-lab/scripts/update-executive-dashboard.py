@@ -56,9 +56,11 @@ RISK_MAPPINGS = [
 
 
 def q(columns, summarize=None, alias=None, computed=None):
-    # No collection variable on this dashboard: filter_expr must be None.
-    return ent.query("A", META_URL, columns, computed=computed,
-                     filter_expr=None, summarize=summarize, alias=alias)
+    cols = list(columns)
+    if not any(c["text"] == "collectionId" for c in cols):
+        cols.append(ent.col("collectionId", "collectionId", "string"))
+    return ent.query("A", META_URL, cols, computed=computed,
+                     filter_expr=ent.FILTER, summarize=summarize, alias=alias)
 
 
 def big_stat(grid, title, query, unit, thresholds, decimals=0, desc="",
@@ -133,9 +135,7 @@ panels.append(ent.donut({"h": 9, "w": 9, "x": 0, "y": 12},
                         desc="All required checks across every environment: "
                              "passed (green), open findings (red), not "
                              "applicable (blue), not yet assessed (orange)."))
-# donut() adds the collections filter only for meta URLs — strip it here
-# because this dashboard has no collection variable.
-panels[-1]["targets"][0].pop("filterExpression", None)
+
 
 panels.append({
     "type": "stat", "title": "Open findings by severity — all environments",
@@ -147,6 +147,9 @@ panels.append({
                    col("metrics.findings.medium", "CAT II (medium)"),
                    col("metrics.findings.low", "CAT III (low)")],
                   summarize=None)],
+    "transformations": [{"id": "filterFieldsByName", "options": {
+        "include": {"names": ["CAT I (critical)", "CAT II (medium)",
+                              "CAT III (low)"]}}}],
     "options": {"reduceOptions": {"values": False, "calcs": ["sum"]},
                 "colorMode": "background", "graphMode": "none",
                 "justifyMode": "auto", "orientation": "auto",
@@ -196,7 +199,7 @@ dashboard = {
     "version": 1,
     "refresh": "5m",
     "time": {"from": "now-6h", "to": "now"},
-    "templating": {"list": []},
+    "templating": {"list": [ent.collections_variable()]},
     "annotations": {"list": []},
     "links": [
         {"title": "Details: Enterprise Overview", "type": "link", "icon": "dashboard",
