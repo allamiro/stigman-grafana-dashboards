@@ -41,6 +41,27 @@ In the Keycloak admin console, inside the realm STIG Manager uses
 > *Add client scope* dialog can only attach scopes that already exist — if
 > you create the client first you'll have to come back to it afterwards.
 
+> **Existing STIG Manager realm? Steps 1–2 are usually just a check.**
+> Client scopes are shared realm objects, and a realm that already serves
+> the STIG Manager web client normally has the `stig-manager:*` scopes
+> defined — so you only *attach* them to the new client (step 3), you don't
+> re-create them. Verify three things instead of assuming:
+>
+> * The **`:read` variants** exist. Some setups defined only the write
+>   scopes (`stig-manager:collection` etc.). Attach **only** `:read` scopes
+>   to the reporter — never the write scopes. If the `:read` variants are
+>   missing from the picker, create them per step 1.
+> * The **audience scope is usually NOT pre-existing** — plain STIG Manager
+>   setups often run without `STIGMAN_JWT_AUD_VALUE`. Check the STIG Manager
+>   environment: if the variable is set, create/attach the audience scope
+>   (step 2) or reporter tokens will fail audience validation; if it is not
+>   set, skip step 2 entirely.
+> * **The token is the proof** — after attaching scopes, run the smoke test
+>   in step 4. `scope` must list the four `:read` scopes (if one is missing,
+>   that scope has *Include in token scope = Off* — turn it on),
+>   `preferred_username` must be `service-account-nexus-reporter`, and `aud`
+>   must contain your `STIGMAN_JWT_AUD_VALUE` when one is configured.
+
 1. **Client scopes** (skip any that already exist — the STIG Manager realm
    usually has them): *Client scopes → Create client scope*, protocol
    OpenID Connect, type *None*, name each of:
