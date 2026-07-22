@@ -1,0 +1,24 @@
+# Infinity datasource -> STIG Manager API, authenticated with OAuth2
+# client-credentials against Keycloak (service account: nexus-reporter).
+# Secrets are injected from container environment variables — never stored here.
+apiVersion: 1
+
+datasources:
+  - name: STIG Manager
+    uid: stigmanager-infinity
+    type: yesoreyeram-infinity-datasource
+    access: proxy
+    isDefault: true
+    editable: false
+    jsonData:
+      auth_method: oauth2
+      oauth2:
+        oauth2_type: client_credentials
+        client_id: $NEXUS_REPORTER_CLIENT_ID
+        token_url: http://keycloak:8080/realms/stigman/protocol/openid-connect/token
+      allowedHosts:
+        - http://stigman:54000
+      oauthPassThru: false
+      tlsSkipVerify: false
+    secureJsonData:
+      oauth2ClientSecret: $NEXUS_REPORTER_CLIENT_SECRET

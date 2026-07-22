@@ -1,0 +1,15 @@
+# Never commit populated secrets
+.env
+*.env
+!.env.example
+
+# Local test artifacts
+test-output/
+test-data/
+screenshots/
+metrics-history/local/.venv/
+metrics-history/kubernetes/secret.yaml
+*.log
+.DS_Store
+__pycache__/
+*.pyc

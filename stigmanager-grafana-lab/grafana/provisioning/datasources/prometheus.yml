@@ -1,0 +1,15 @@
+# Prometheus datasource backing the trend dashboards (posture history
+# recorded by the stigman-exporter).
+apiVersion: 1
+
+datasources:
+  - name: STIG Posture History
+    uid: stigmanager-prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: false
+    editable: false
+    jsonData:
+      timeInterval: 60s
+      httpMethod: POST

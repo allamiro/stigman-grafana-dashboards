@@ -1,0 +1,19 @@
+# Only for clusters running prometheus-operator / kube-prometheus-stack.
+# Skip this file if your Prometheus discovers targets via annotations.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: stigman-exporter
+  namespace: stigman-metrics
+  labels:
+    app.kubernetes.io/name: stigman-exporter
+    # match your Prometheus's serviceMonitorSelector, commonly:
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: stigman-exporter
+  endpoints:
+    - port: metrics
+      interval: 60s
+      scrapeTimeout: 20s

@@ -1,0 +1,1193 @@
+{
+  "uid": "stig-posture-executive",
+  "title": "STIG Posture \u2014 Executive Summary",
+  "description": "One-page management view of STIG compliance across all collections. Read-only data via nexus-reporter.",
+  "tags": [
+    "stig",
+    "posture",
+    "executive"
+  ],
+  "timezone": "browser",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "liveNow": false,
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "5m",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "templating": {
+    "list": []
+  },
+  "annotations": {
+    "list": []
+  },
+  "links": [
+    {
+      "title": "Details: Enterprise Overview",
+      "type": "link",
+      "icon": "dashboard",
+      "url": "/d/stig-posture-enterprise",
+      "targetBlank": false,
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": false,
+      "tags": []
+    },
+    {
+      "title": "Drill-down: Per Collection",
+      "type": "link",
+      "icon": "dashboard",
+      "url": "/d/stig-posture-collection",
+      "targetBlank": false,
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": false,
+      "tags": []
+    }
+  ],
+  "panels": [
+    {
+      "type": "text",
+      "title": "",
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "options": {
+        "mode": "markdown",
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "# STIG Compliance \u2014 Executive Summary\n\nSecurity compliance status across **all monitored environments** (every STIG\nManager collection \u2014 currently *Linux Production* and *Windows Production*).\nFigures are pulled live from the assessment system by a read-only reporting\naccount and are computed from totals across all environments.\n\n**The four numbers that matter:** overall **Risk level**, **Critical (CAT I)\nfindings** (any number above zero needs a remediation plan), **Compliance\nrate** (checks passing, of those assessed), and **Assessment coverage** (how\nmuch of the estate has actually been checked \u2014 low coverage means the other\nnumbers understate risk).\n\nNeed detail? Use the links in the top-right: *Enterprise Overview* for the\nper-environment breakdown, *Per Collection* for a single environment.\n"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "id": 1
+    },
+    {
+      "type": "stat",
+      "title": "Overall risk level",
+      "description": "CORA-style weighted risk across all environments. LOW / MODERATE / HIGH / VERY HIGH. CORA-style weighted risk score computed from aggregated raw counts: p_sev = (open findings + unassessed) / assessments per severity, CORA = (p1*10 + p2*4 + p3*1) / 15. Zero-assessment severities contribute 0. Bands: 0% Low, >0% Moderate, >=10% High, >=20% Very High. Lab interpretation \u2014 verify against current DISA CORA guidance before treating as authoritative.",
+      "gridPos": {
+        "h": 6,
+        "w": 5,
+        "x": 0,
+        "y": 6
+      },
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "stigmanager-infinity"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "stigmanager-infinity"
+          },
+          "queryType": "infinity",
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://stigman:54000/api/collections/meta/metrics/summary/collection",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "",
+          "columns": [
+            {
+              "selector": "metrics.findings.high",
+              "text": "high",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.findings.medium",
+              "text": "medium",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.findings.low",
+              "text": "low",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.assessmentsBySeverity.high",
+              "text": "assessmentsHigh",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.assessmentsBySeverity.medium",
+              "text": "assessmentsMedium",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.assessmentsBySeverity.low",
+              "text": "assessmentsLow",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.assessedBySeverity.high",
+              "text": "assessedHigh",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.assessedBySeverity.medium",
+              "text": "assessedMedium",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.assessedBySeverity.low",
+              "text": "assessedLow",
+              "type": "number"
+            }
+          ],
+          "summarizeExpression": "((sum(assessmentsHigh) > 0 ? (sum(high) + sum(assessmentsHigh) - sum(assessedHigh)) / sum(assessmentsHigh) : 0) * 10 + (sum(assessmentsMedium) > 0 ? (sum(medium) + sum(assessmentsMedium) - sum(assessedMedium)) / sum(assessmentsMedium) : 0) * 4 + (sum(assessmentsLow) > 0 ? (sum(low) + sum(assessmentsLow) - sum(assessedLow)) / sum(assessmentsLow) : 0) * 1) / 15 * 100",
+          "summarizeAlias": "Risk"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 0.001
+              },
+              {
+                "color": "orange",
+                "value": 10
+              },
+              {
+                "color": "red",
+                "value": 20
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "range",
+              "options": {
+                "from": 20,
+                "to": 1000000000.0,
+                "result": {
+                  "text": "VERY HIGH",
+                  "color": "red",
+                  "index": 0
+                }
+              }
+            },
+            {
+              "type": "range",
+              "options": {
+                "from": 10,
+                "to": 20,
+                "result": {
+                  "text": "HIGH",
+                  "color": "orange",
+                  "index": 1
+                }
+              }
+            },
+            {
+              "type": "range",
+              "options": {
+                "from": 1e-06,
+                "to": 10,
+                "result": {
+                  "text": "MODERATE",
+                  "color": "#EAB839",
+                  "index": 2
+                }
+              }
+            },
+            {
+              "type": "range",
+              "options": {
+                "from": -1,
+                "to": 1e-06,
+                "result": {
+                  "text": "LOW",
+                  "color": "green",
+                  "index": 3
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "id": 2
+    },
+    {
+      "type": "gauge",
+      "title": "Risk score",
+      "description": "Same risk figure as the verdict tile, shown against the 0-100% band scale. CORA-style weighted risk score computed from aggregated raw counts: p_sev = (open findings + unassessed) / assessments per severity, CORA = (p1*10 + p2*4 + p3*1) / 15. Zero-assessment severities contribute 0. Bands: 0% Low, >0% Moderate, >=10% High, >=20% Very High. Lab interpretation \u2014 verify against current DISA CORA guidance before treating as authoritative.",
+      "gridPos": {
+        "h": 6,
+        "w": 5,
+        "x": 5,
+        "y": 6
+      },
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "stigmanager-infinity"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "stigmanager-infinity"
+          },
+          "queryType": "infinity",
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://stigman:54000/api/collections/meta/metrics/summary/collection",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "",
+          "columns": [
+            {
+              "selector": "metrics.findings.high",
+              "text": "high",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.findings.medium",
+              "text": "medium",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.findings.low",
+              "text": "low",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.assessmentsBySeverity.high",
+              "text": "assessmentsHigh",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.assessmentsBySeverity.medium",
+              "text": "assessmentsMedium",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.assessmentsBySeverity.low",
+              "text": "assessmentsLow",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.assessedBySeverity.high",
+              "text": "assessedHigh",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.assessedBySeverity.medium",
+              "text": "assessedMedium",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.assessedBySeverity.low",
+              "text": "assessedLow",
+              "type": "number"
+            }
+          ],
+          "summarizeExpression": "((sum(assessmentsHigh) > 0 ? (sum(high) + sum(assessmentsHigh) - sum(assessedHigh)) / sum(assessmentsHigh) : 0) * 10 + (sum(assessmentsMedium) > 0 ? (sum(medium) + sum(assessmentsMedium) - sum(assessedMedium)) / sum(assessmentsMedium) : 0) * 4 + (sum(assessmentsLow) > 0 ? (sum(low) + sum(assessmentsLow) - sum(assessedLow)) / sum(assessmentsLow) : 0) * 1) / 15 * 100",
+          "summarizeAlias": "CORA"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "sizing": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 0.001
+              },
+              {
+                "color": "orange",
+                "value": 10
+              },
+              {
+                "color": "red",
+                "value": 20
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "id": 3
+    },
+    {
+      "type": "stat",
+      "title": "Critical (CAT I) findings",
+      "description": "Mission-critical weaknesses currently open across all environments. Target: 0.",
+      "gridPos": {
+        "h": 6,
+        "w": 5,
+        "x": 10,
+        "y": 6
+      },
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "stigmanager-infinity"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "stigmanager-infinity"
+          },
+          "queryType": "infinity",
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://stigman:54000/api/collections/meta/metrics/summary/collection",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "",
+          "columns": [
+            {
+              "selector": "metrics.findings.high",
+              "text": "high",
+              "type": "number"
+            }
+          ],
+          "summarizeExpression": "sum(high)",
+          "summarizeAlias": "CAT I"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "id": 4
+    },
+    {
+      "type": "stat",
+      "title": "Compliance rate",
+      "description": "Of everything assessed so far, the share that passed. sum(pass) / sum(assessed) across all environments.",
+      "gridPos": {
+        "h": 6,
+        "w": 5,
+        "x": 15,
+        "y": 6
+      },
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "stigmanager-infinity"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "stigmanager-infinity"
+          },
+          "queryType": "infinity",
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://stigman:54000/api/collections/meta/metrics/summary/collection",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "",
+          "columns": [
+            {
+              "selector": "metrics.results.pass",
+              "text": "pass",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.assessed",
+              "text": "assessed",
+              "type": "number"
+            }
+          ],
+          "summarizeExpression": "sum(assessed) > 0 ? sum(pass) / sum(assessed) * 100 : 0",
+          "summarizeAlias": "Compliance"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 70
+              },
+              {
+                "color": "green",
+                "value": 90
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "id": 5
+    },
+    {
+      "type": "stat",
+      "title": "Assessment coverage",
+      "description": "Share of required checks that have been performed. Low coverage means the risk picture is incomplete.",
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 20,
+        "y": 6
+      },
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "stigmanager-infinity"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "stigmanager-infinity"
+          },
+          "queryType": "infinity",
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://stigman:54000/api/collections/meta/metrics/summary/collection",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "",
+          "columns": [
+            {
+              "selector": "metrics.assessments",
+              "text": "assessments",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.assessed",
+              "text": "assessed",
+              "type": "number"
+            }
+          ],
+          "summarizeExpression": "sum(assessments) > 0 ? sum(assessed) / sum(assessments) * 100 : 0",
+          "summarizeAlias": "Coverage"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 70
+              },
+              {
+                "color": "green",
+                "value": 90
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "id": 6
+    },
+    {
+      "type": "piechart",
+      "title": "Where we stand \u2014 all environments",
+      "description": "All required checks across every environment: passed (green), open findings (red), not applicable (blue), not yet assessed (orange).",
+      "gridPos": {
+        "h": 9,
+        "w": 9,
+        "x": 0,
+        "y": 12
+      },
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "stigmanager-infinity"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "stigmanager-infinity"
+          },
+          "queryType": "infinity",
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://stigman:54000/api/collections/meta/metrics/summary/collection",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "",
+          "columns": [
+            {
+              "selector": "metrics.results.pass",
+              "text": "Compliant",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.results.notapplicable",
+              "text": "Not Applicable",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.results.fail",
+              "text": "Open Findings",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.assessments",
+              "text": "assessments",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.assessed",
+              "text": "assessed",
+              "type": "number"
+            },
+            {
+              "selector": "collectionId",
+              "text": "collectionId",
+              "type": "string"
+            }
+          ],
+          "computed_columns": [
+            {
+              "selector": "assessments - assessed",
+              "text": "Not Assessed",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "Compliant",
+                "Not Applicable",
+                "Open Findings",
+                "Not Assessed"
+              ]
+            }
+          }
+        }
+      ],
+      "options": {
+        "pieType": "donut",
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "sum"
+          ]
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "values": [
+            "value",
+            "percent"
+          ]
+        },
+        "displayLabels": [
+          "percent"
+        ],
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Compliant"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Not Applicable"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Open Findings"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Not Assessed"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "id": 7
+    },
+    {
+      "type": "barchart",
+      "title": "Open findings by severity \u2014 all environments",
+      "description": "CAT I = critical, CAT II = medium, CAT III = low. Summed across every environment.",
+      "gridPos": {
+        "h": 9,
+        "w": 9,
+        "x": 9,
+        "y": 12
+      },
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "stigmanager-infinity"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "stigmanager-infinity"
+          },
+          "queryType": "infinity",
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://stigman:54000/api/collections/meta/metrics/summary/collection",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "",
+          "columns": [
+            {
+              "selector": "metrics.findings.high",
+              "text": "CAT I (critical)",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.findings.medium",
+              "text": "CAT II (medium)",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.findings.low",
+              "text": "CAT III (low)",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "transformations": [
+        {
+          "id": "reduce",
+          "options": {
+            "reducers": [
+              "sum"
+            ]
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "Field": "Severity"
+            },
+            "excludeByName": {},
+            "indexByName": {}
+          }
+        }
+      ],
+      "options": {
+        "orientation": "horizontal",
+        "stacking": "none",
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0,
+        "showValue": "always",
+        "groupWidth": 0.7,
+        "barWidth": 0.6,
+        "fullHighlight": false,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "dark-red"
+          },
+          "custom": {
+            "fillOpacity": 85,
+            "lineWidth": 1,
+            "axisCenteredZero": false,
+            "axisPlacement": "auto"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byType",
+              "options": "number"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Open findings"
+              }
+            ]
+          }
+        ]
+      },
+      "id": 8
+    },
+    {
+      "type": "stat",
+      "title": "Environments (collections)",
+      "description": "Monitored STIG Manager collections.",
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 18,
+        "y": 12
+      },
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "stigmanager-infinity"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "stigmanager-infinity"
+          },
+          "queryType": "infinity",
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://stigman:54000/api/collections/meta/metrics/summary/collection",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "",
+          "columns": [
+            {
+              "selector": "collectionId",
+              "text": "collectionId",
+              "type": "string"
+            }
+          ],
+          "summarizeExpression": "count(collectionId)",
+          "summarizeAlias": "Environments"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "id": 9
+    },
+    {
+      "type": "stat",
+      "title": "Assets under assessment",
+      "description": "Servers/devices with assigned STIG checklists.",
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 18,
+        "y": 15
+      },
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "stigmanager-infinity"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "stigmanager-infinity"
+          },
+          "queryType": "infinity",
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://stigman:54000/api/collections/meta/metrics/summary/collection",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "",
+          "columns": [
+            {
+              "selector": "assets",
+              "text": "assets",
+              "type": "number"
+            }
+          ],
+          "summarizeExpression": "sum(assets)",
+          "summarizeAlias": "Assets"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "id": 10
+    },
+    {
+      "type": "stat",
+      "title": "Total required checks",
+      "description": "Individual STIG rules to be assessed across all assets.",
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 18,
+        "y": 18
+      },
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "stigmanager-infinity"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "stigmanager-infinity"
+          },
+          "queryType": "infinity",
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://stigman:54000/api/collections/meta/metrics/summary/collection",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "",
+          "columns": [
+            {
+              "selector": "metrics.assessments",
+              "text": "assessments",
+              "type": "number"
+            }
+          ],
+          "summarizeExpression": "sum(assessments)",
+          "summarizeAlias": "Checks"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "id": 11
+    }
+  ]
+}
