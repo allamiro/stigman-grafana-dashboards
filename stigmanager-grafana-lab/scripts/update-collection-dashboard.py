@@ -121,6 +121,9 @@ panels.append(ent.tile_stat(
         "include": {"names": ["Unassessed", "Saved", "Submitted",
                               "Accepted", "Rejected"]}}}]))
 
+panels.append(ent.review_age_tiles(
+    {"h": 3, "w": 24, "x": 0, "y": 14}, "Review ages", SUMMARY_URL))
+
 for pid, p in enumerate(panels, start=1):
     p["id"] = pid
 

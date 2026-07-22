@@ -216,7 +216,10 @@ scrape_configs:
 ```
 
 Check *Status → Targets* shows the job **UP**, then query
-`stigman_collection_cora_percent` in the Prometheus UI. Set retention to
+`stigman_collection_cora_percent` in the Prometheus UI (the exporter also
+records results, findings and per-severity assessment gauges, workflow
+statuses via `stigman_collection_statuses{status=}`, and
+`stigman_collection_last_touch_timestamp_seconds`). Set retention to
 cover your reporting horizon (e.g. `--storage.tsdb.retention.time=395d`
 for year-over-year).
 
@@ -286,34 +289,55 @@ datasources:
 
 ### 4d. Dashboards — fix the API URL, then import
 
-The live dashboards embed the STIG Manager API base URL in every query
+There are **four dashboard folders**:
+
+| Directory | Grafana folder | Datasource | Contains API URLs? |
+|---|---|---|---|
+| `grafana/dashboards/` | STIG Posture | Infinity | **yes** |
+| `grafana/dashboards-cyber/` | STIG Posture (Cyber Analysis) | Infinity | **yes** |
+| `grafana/dashboards-trends/` | STIG Posture (Trends) | Prometheus | no |
+| `grafana/dashboards-snapshots/` | STIG Posture (History Snapshots) | Prometheus | no |
+
+The Infinity dashboards embed the STIG Manager API base URL in every query
 (in the lab it is `http://stigman:54000/api`). Point them at your API —
-either regenerate:
+either regenerate (single source of truth; the other generators import the
+enterprise one, so edit the URL constants in these files):
 
 ```bash
-# edit API = "http://stigman:54000/api" -> your URL in:
-#   scripts/update-enterprise-dashboard.py   (the other generators reuse it)
+# edit API/META_URL "http://stigman:54000/api" -> your URL in
+# scripts/update-enterprise-dashboard.py, then check the API constant in
+# update-collection-dashboard.py and update-cyber-dashboards.py too:
 python3 scripts/update-enterprise-dashboard.py
 python3 scripts/update-executive-dashboard.py
 python3 scripts/update-management-dashboard.py
-python3 /path/to/gen or edit stig-posture-collection.json equivalently
+python3 scripts/update-collection-dashboard.py
+python3 scripts/update-cyber-dashboards.py
+python3 scripts/update-trend-dashboards.py      # no URLs, safe to re-run
+python3 scripts/update-snapshot-dashboards.py   # no URLs, safe to re-run
 ```
 
-or just search-replace in the JSON files:
+or just search-replace in the generated JSON:
 
 ```bash
-sed -i 's|http://stigman:54000|https://stigman.example.internal|g' grafana/dashboards/*.json
+sed -i 's|http://stigman:54000|https://stigman.example.internal|g' \
+  grafana/dashboards/*.json grafana/dashboards-cyber/*.json
 ```
 
 The replacement URL must match an entry in the Infinity datasource's
-**allowed hosts** (4b). The Prometheus-based dashboards
-(`grafana/dashboards-trends/`, `grafana/dashboards-snapshots/`) contain no
-URLs — only the `stigmanager-prometheus` UID — and import unchanged.
+**allowed hosts** (4b). The Prometheus dashboards contain no URLs — only
+the `stigmanager-prometheus` UID — and import unchanged.
 
-Import: copy the three dashboard directories to the Grafana server and add
-file providers like this repo's
-`grafana/provisioning/dashboards/dashboards.yml`, or import each JSON by
-hand (*Dashboards → New → Import → paste JSON*).
+Import: copy all four dashboard directories to the Grafana server and add
+the four file providers exactly as in this repo's
+`grafana/provisioning/dashboards/dashboards.yml` (one provider per folder),
+or import each JSON by hand (*Dashboards → New → Import → paste JSON*).
+
+**Collection selection needs no extra configuration**: the aggregate
+dashboards' multi-select *Collections* picker and the per-collection /
+cyber dropdowns populate themselves from `GET /api/collections` (Infinity)
+or Prometheus label values — which means they only ever show collections
+the `nexus-reporter` account has been **granted** (step 2). A collection
+you never grant simply never appears on any dashboard.
 
 ## 5. End-to-end verification order
 

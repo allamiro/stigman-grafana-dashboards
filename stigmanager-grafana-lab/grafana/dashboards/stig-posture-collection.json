@@ -1001,6 +1001,125 @@
         ]
       },
       "id": 7
+    },
+    {
+      "type": "stat",
+      "title": "Review ages",
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 14
+      },
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "stigmanager-infinity"
+      },
+      "description": "Review ages, like the STIG Manager UI: Oldest/Newest = first/last review result, Updated = most recent touch.",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "stigmanager-infinity"
+          },
+          "queryType": "infinity",
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://stigman:54000/api/collections/$collection/metrics/summary/collection",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "",
+          "columns": [
+            {
+              "selector": "metrics.minTs",
+              "text": "Oldest",
+              "type": "timestamp"
+            },
+            {
+              "selector": "metrics.maxTs",
+              "text": "Newest",
+              "type": "timestamp"
+            },
+            {
+              "selector": "metrics.maxTouchTs",
+              "text": "Updated",
+              "type": "timestamp"
+            }
+          ]
+        }
+      ],
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "Oldest",
+                "Newest",
+                "Updated"
+              ]
+            }
+          }
+        },
+        {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "targetField": "Oldest",
+                "destinationType": "number"
+              },
+              {
+                "targetField": "Newest",
+                "destinationType": "number"
+              },
+              {
+                "targetField": "Updated",
+                "destinationType": "number"
+              }
+            ],
+            "fields": {}
+          }
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "dateTimeFromNow",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "id": 8
     }
   ]
 }

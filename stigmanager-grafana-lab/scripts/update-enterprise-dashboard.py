@@ -188,6 +188,40 @@ STATUS_TILE_COLORS = [("Unassessed", UNASSESSED_COLOR),
                       ("Rejected", REJECTED_COLOR)]
 
 
+def review_age_tiles(grid, title, url, filter_expr=None, id_col=None,
+                     desc=""):
+    """Native-UI style Review Ages tiles: Oldest / Newest / Updated."""
+    cols = [col("metrics.minTs", "Oldest", "timestamp"),
+            col("metrics.maxTs", "Newest", "timestamp"),
+            col("metrics.maxTouchTs", "Updated", "timestamp")]
+    if id_col:
+        cols.append(id_col)
+    return {
+        "type": "stat", "title": title, "gridPos": grid, "datasource": DS,
+        "description": desc or ("Review ages, like the STIG Manager UI: "
+                                "Oldest/Newest = first/last review result, "
+                                "Updated = most recent touch."),
+        "targets": [query("A", url, cols, filter_expr=filter_expr)],
+        "transformations": [
+            {"id": "filterFieldsByName", "options": {
+                "include": {"names": ["Oldest", "Newest", "Updated"]}}},
+            {"id": "convertFieldType", "options": {"conversions": [
+                {"targetField": "Oldest", "destinationType": "number"},
+                {"targetField": "Newest", "destinationType": "number"},
+                {"targetField": "Updated", "destinationType": "number"}],
+                "fields": {}}}],
+        "options": {"reduceOptions": {"values": False,
+                                      "calcs": ["lastNotNull"]},
+                    "colorMode": "value", "graphMode": "none",
+                    "justifyMode": "auto", "orientation": "auto",
+                    "textMode": "value_and_name", "wideLayout": True},
+        "fieldConfig": {"defaults": {"unit": "dateTimeFromNow",
+                                     "thresholds": NEUTRAL_THRESHOLDS,
+                                     "color": {"mode": "thresholds"}},
+                        "overrides": []},
+    }
+
+
 def donut(grid, title, url, desc="", calcs="sum"):
     """Posture donut. calcs='sum' aggregates across collection rows."""
     q = query("A", url, [
@@ -392,6 +426,7 @@ def build():
         col("metrics.assessments", "assessments"),
         col("metrics.assessed", "assessed"),
         col("metrics.results.fail", "Open findings"),
+        col("metrics.maxTouchTs", "Updated", "timestamp"),
     ] + SEVERITY_COLS,
         computed=[
             {"selector": "assessments > 0 ? assessed / assessments * 100 : 0",
@@ -410,7 +445,7 @@ def build():
             "indexByName": {"collectionId": 0, "Collection": 1, "Assets": 2,
                             "assessments": 3, "assessed": 4, "Coverage %": 5,
                             "Open findings": 6, "high": 7, "medium": 8,
-                            "low": 9, "CORA %": 10},
+                            "low": 9, "Updated": 10, "CORA %": 11},
             "renameByName": {"collectionId": "ID",
                              "assessments": "Assessments",
                              "assessed": "Assessed",
@@ -442,7 +477,9 @@ def build():
             {"matcher": {"id": "byName", "options": "CAT I"},
              "properties": [{"id": "thresholds", "value": ALERT_THRESHOLDS},
                             {"id": "custom.cellOptions",
-                             "value": {"type": "color-text"}}]}]},
+                             "value": {"type": "color-text"}}]},
+            {"matcher": {"id": "byName", "options": "Updated"},
+             "properties": [{"id": "unit", "value": "dateTimeFromNow"}]}]},
     })
 
     # ---- repeated per-collection donuts --------------------------------

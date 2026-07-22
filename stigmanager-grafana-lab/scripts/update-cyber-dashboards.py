@@ -58,7 +58,11 @@ def pct_override(name, thresholds):
                  "value": {"type": "color-background", "mode": "basic"}}]}
 
 
-POSTURE_COLS = [
+AGE_COLS = [col("metrics.minTs", "Oldest", "timestamp"),
+            col("metrics.maxTs", "Newest", "timestamp"),
+            col("metrics.maxTouchTs", "Updated", "timestamp")]
+
+POSTURE_COLS = AGE_COLS + [
     col("metrics.assessments", "assessments"),
     col("metrics.assessed", "assessed"),
     col("metrics.results.fail", "Open findings"),
@@ -79,7 +83,12 @@ HIDE_HELPERS = {"assessments": False, "assessed": False,
                 "assessmentsLow": True, "assessedHigh": True,
                 "assessedMedium": True, "assessedLow": True}
 
-POSTURE_OVERRIDES = [
+AGE_OVERRIDES = [
+    {"matcher": {"id": "byName", "options": n},
+     "properties": [{"id": "unit", "value": "dateTimeFromNow"}]}
+    for n in ("Oldest", "Newest", "Updated")]
+
+POSTURE_OVERRIDES = AGE_OVERRIDES + [
     pct_override("Coverage %", ent.COVERAGE_THRESHOLDS),
     pct_override("CORA %", ent.CORA_THRESHOLDS),
     bg_override("CAT 1", ent.CAT1_COLOR),
@@ -105,7 +114,8 @@ def posture_table(grid, title, url, first_cols, first_renames, desc="",
     ordered = [c["text"] for c in first_cols]
     ordered += ["assessments", "assessed", "Coverage %", "Open findings",
                 "high", "medium", "low", "Saved", "Submitted",
-                "Accepted", "Rejected", "CORA %"]
+                "Accepted", "Rejected", "Oldest", "Newest", "Updated",
+                "CORA %"]
     index_by_name = {name: i for i, name in enumerate(dict.fromkeys(ordered))}
     return {
         "type": "table", "title": title, "description": desc,
@@ -246,14 +256,16 @@ def base(uid, title, desc, panels, templating):
 SUMMARY = f"{API}/collections/$collection/metrics/summary"
 
 panels = [
-    sev_tiles({"h": 4, "w": 12, "x": 0, "y": 0},
+    sev_tiles({"h": 4, "w": 8, "x": 0, "y": 0},
               "Open findings by severity — $collection",
               f"{SUMMARY}/collection",
               desc="Colors match the STIG Manager UI."),
-    status_tiles({"h": 4, "w": 12, "x": 12, "y": 0},
+    status_tiles({"h": 4, "w": 10, "x": 8, "y": 0},
                  "Review workflow status — $collection",
                  f"{SUMMARY}/collection",
                  desc="Where reviews sit in the workflow."),
+    ent.review_age_tiles({"h": 4, "w": 6, "x": 18, "y": 0},
+                         "Review ages", f"{SUMMARY}/collection"),
     posture_table(
         {"h": 8, "w": 24, "x": 0, "y": 4}, "Posture by STIG benchmark",
         f"{SUMMARY}/stig",
@@ -378,9 +390,13 @@ apanels.append(cora_gauge)
 
 apanels.append(sev_tiles({"h": 4, "w": 5, "x": 19, "y": 0},
                          "Findings", ASSET_URL, filter_expr=ASSET_FILTER))
-apanels.append(status_tiles({"h": 4, "w": 15, "x": 9, "y": 5},
+apanels.append(status_tiles({"h": 4, "w": 10, "x": 9, "y": 5},
                             "Review workflow status", ASSET_URL,
                             filter_expr=ASSET_FILTER))
+apanels.append(ent.review_age_tiles(
+    {"h": 4, "w": 5, "x": 19, "y": 5}, "Review ages", ASSET_URL,
+    filter_expr=ASSET_FILTER,
+    id_col=ent.col("assetId", "assetId", "string")))
 
 apanels.append(posture_table(
     {"h": 7, "w": 24, "x": 0, "y": 9}, "STIGs on this asset",
