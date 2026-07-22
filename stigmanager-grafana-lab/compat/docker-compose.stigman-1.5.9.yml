@@ -1,0 +1,72 @@
+# Parallel STIG Manager 1.5.9 instance for version-compatibility testing.
+# Reuses the main lab's Keycloak (same realm, same clients) over the
+# existing stigman-lab network; has its OWN fresh MySQL (migrations are
+# forward-only, so 1.5.9 must never touch the 1.6.13 database).
+#
+#   docker compose -f compat/docker-compose.stigman-1.5.9.yml --project-directory . up -d
+#   API: http://localhost:54001
+#
+# Tear down (removes the test DB volume):
+#   docker compose -f compat/docker-compose.stigman-1.5.9.yml --project-directory . down -v
+
+name: stigman159-compat
+
+networks:
+  stigman-lab:
+    external: true
+    name: stigmanager-grafana-lab_stigman-lab
+
+volumes:
+  stigman159-db-data:
+
+services:
+  stigman159-db:
+    image: mysql:8.0.46
+    container_name: sml-stigman159-db
+    restart: unless-stopped
+    command:
+      - mysqld
+      - --innodb-buffer-pool-size=256M
+    environment:
+      MYSQL_DATABASE: ${STIGMAN_DB_NAME:-stigman}
+      MYSQL_USER: ${STIGMAN_DB_USER:-stigman}
+      MYSQL_PASSWORD: ${STIGMAN_DB_PASSWORD:?set in .env}
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+    volumes:
+      - stigman159-db-data:/var/lib/mysql
+    networks: [stigman-lab]
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u$${MYSQL_USER} -p$${MYSQL_PASSWORD} --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  stigman159:
+    image: nuwcdivnpt/stig-manager:1.5.9
+    container_name: sml-stigman159
+    restart: unless-stopped
+    depends_on:
+      stigman159-db:
+        condition: service_healthy
+    environment:
+      STIGMAN_API_PORT: "54000"
+      STIGMAN_DB_HOST: stigman159-db
+      STIGMAN_DB_PORT: "3306"
+      STIGMAN_DB_SCHEMA: ${STIGMAN_DB_NAME:-stigman}
+      STIGMAN_DB_USER: ${STIGMAN_DB_USER:-stigman}
+      STIGMAN_DB_PASSWORD: ${STIGMAN_DB_PASSWORD:?set in .env}
+      STIGMAN_OIDC_PROVIDER: http://keycloak:8080/realms/stigman
+      STIGMAN_CLIENT_OIDC_PROVIDER: http://localhost:8180/realms/stigman
+      STIGMAN_CLIENT_ID: stig-manager
+      STIGMAN_JWT_AUD_VALUE: stig-manager
+      STIGMAN_CLASSIFICATION: U
+    networks: [stigman-lab]
+    ports:
+      - "54001:54000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:54000/api/op/configuration || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s

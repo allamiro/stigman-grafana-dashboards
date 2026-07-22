@@ -354,6 +354,39 @@ panel shows posture as of that moment — no time-series to watch:
 Note: trends and snapshots exist from the moment the exporter first runs —
 history cannot be backfilled for dates before that.
 
+## 10b. Version compatibility (tested: 1.6.13 and 1.5.9)
+
+`compat/docker-compose.stigman-1.5.9.yml` stands up a parallel STIG Manager
+1.5.9 with its own fresh MySQL on the same network (port 54001), reusing the
+main Keycloak realm:
+
+```bash
+docker compose -f compat/docker-compose.stigman-1.5.9.yml --project-directory . up -d
+STIGMAN_URL=http://localhost:54001 ./scripts/seed-test-data.sh
+STIGMAN_URL=http://localhost:54001 ./scripts/grant-reporter-access.sh 1
+STIGMAN_URL=http://localhost:54001 ./scripts/test-collection-metrics.sh 1
+# tear down (removes its DB volume):
+docker compose -f compat/docker-compose.stigman-1.5.9.yml --project-directory . down -v
+```
+
+Result of the live test: **1.5.9 is fully compatible** — identical auth
+(realm/scopes/audience), identical grants model (roleId + read-only ACL),
+and the metrics summary already includes the per-severity CORA fields. All
+seed/grant/test scripts and all dashboard queries work unchanged.
+
+Rules when changing versions:
+
+* **Never point an older image at a newer database** — migrations are
+  forward-only (1.6.13 had migrated far beyond 1.5.9's migration 40). Use a
+  fresh volume (as the compat file does) or wipe `stigman-db-data`.
+* If the STIG Manager **hostname/port changes**, update the Infinity
+  datasource `allowedHosts` and the dashboard query URLs — otherwise
+  Infinity rejects the request ("requested URL not allowed"). With the same
+  hostname, nothing changes on the Grafana side.
+* Versions **older than the 1.5.9-era releases** may lack the
+  `assessmentsBySeverity`/`assessedBySeverity` fields (CORA gauges) or the
+  grantId/ACL model — check `GET /api/op/definition` first.
+
 ## 11. CORA risk score
 
 Implemented exactly as specified, per severity category:
