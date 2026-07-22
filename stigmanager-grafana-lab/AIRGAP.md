@@ -36,6 +36,11 @@ Grafana ──(PromQL)──> Prometheus ──scrape :9633──> stigman_expor
 In the Keycloak admin console, inside the realm STIG Manager uses
 (shown here as `stigman`):
 
+> **Order matters:** create the client scopes (steps 1–2) *before* the
+> client (step 3). Client scopes are realm-level objects, and the client's
+> *Add client scope* dialog can only attach scopes that already exist — if
+> you create the client first you'll have to come back to it afterwards.
+
 1. **Client scopes** (skip any that already exist — the STIG Manager realm
    usually has them): *Client scopes → Create client scope*, protocol
    OpenID Connect, type *None*, name each of:
