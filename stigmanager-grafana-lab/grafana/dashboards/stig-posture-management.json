@@ -1462,7 +1462,8 @@
               "assessedMedium": true,
               "assessedLow": true,
               "medium": true,
-              "low": true
+              "low": true,
+              "collectionId": true
             },
             "indexByName": {
               "Environment": 0,

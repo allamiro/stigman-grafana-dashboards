@@ -225,6 +225,12 @@ per-severity data: `metrics.results.{pass,fail,notapplicable,other}`,
 
 ## 10. Dashboards
 
+> **Collection filtering:** every aggregate dashboard (Management Review,
+> Executive Summary, Enterprise Overview, snapshot overview, trends) has a
+> multi-select **Collections** picker (default *All*) — deselect test or
+> out-of-scope collections to exclude them from every number on the page.
+> Single-collection dashboards select via their own dropdown.
+
 ### STIG Posture — Management Review (`/d/stig-posture-management`)
 
 The recommended dashboard for manager/leadership reviews, built on published
