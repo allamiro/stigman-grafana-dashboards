@@ -19,3 +19,15 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+PROJECT NOTICE (in addition to, not in place of, the MIT terms above):
+
+This project was developed and validated as a LAB / demonstration
+environment. It is not a production deployment, is not affiliated with or
+endorsed by DISA, NUWC Division Newport (STIG Manager), Keycloak, or
+Grafana Labs, and any use of it — including in production, operational, or
+accredited environments — is entirely at the user's own discretion, risk,
+and responsibility. Review the production-hardening guidance in the
+project documentation before any use outside a lab.

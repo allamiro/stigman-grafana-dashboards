@@ -115,5 +115,18 @@ stigmanager-grafana-lab/
 └── scripts/                  # seed, grants, validation, dashboard generators
 ```
 
-License: [MIT](LICENSE). Lab configuration only — see the production
-hardening section of the lab README before using any of it outside a lab.
+## License and disclaimer
+
+Licensed under [MIT](LICENSE).
+
+**This project was built and validated as a lab / demonstration
+environment.** It ships development-only settings (plain HTTP, Keycloak
+`start-dev`, documented default passwords) and is provided as-is, without
+warranty of any kind. It is not affiliated with or endorsed by DISA,
+NUWC Division Newport (STIG Manager), Keycloak, or Grafana Labs. Any use —
+especially in production, operational, or accredited environments — is
+**entirely at the user's own discretion, risk, and responsibility**. Before
+using any part of it outside a lab, review the
+[production hardening](stigmanager-grafana-lab/README.md#17-production-hardening)
+section and the [security notes](stigmanager-grafana-lab/README.md) in the
+lab documentation.
