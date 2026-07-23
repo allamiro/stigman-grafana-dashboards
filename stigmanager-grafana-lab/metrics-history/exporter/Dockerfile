@@ -10,9 +10,9 @@ FROM python:3.12.13-slim
 
 RUN adduser --system --no-create-home --group exporter
 WORKDIR /app
-COPY requirements.txt .
+COPY --chmod=0644 requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-COPY stigman_exporter.py .
+COPY --chmod=0644 stigman_exporter.py .
 
 USER exporter
 EXPOSE 9633
