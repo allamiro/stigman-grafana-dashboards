@@ -183,8 +183,12 @@ KEYCLOAK_TOKEN_URL=https://sso.example.internal/realms/stigman/protocol/openid-c
 OIDC_CLIENT_ID=nexus-reporter
 OIDC_CLIENT_SECRET=<the secret from step 1.3>
 EXPORTER_PORT=9633
-# Private CA? Point requests at your bundle — do NOT disable verification:
-# REQUESTS_CA_BUNDLE=/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+# Private/internal CA (RECOMMENDED) — point the exporter at your CA bundle:
+# STIGMAN_VERIFY_TLS=/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+#   (REQUESTS_CA_BUNDLE=<path> also works — requests honours it natively.)
+# Lab / self-signed ONLY — turn TLS verification off entirely (INSECURE,
+# never production); logs a warning on startup:
+# STIGMAN_VERIFY_TLS=false
 ```
 
 Systemd unit — `/etc/systemd/system/stigman-exporter.service`:

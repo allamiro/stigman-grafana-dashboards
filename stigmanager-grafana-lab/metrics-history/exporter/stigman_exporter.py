@@ -14,6 +14,10 @@ Configuration (environment variables):
   OIDC_CLIENT_SECRET   (required)
   EXPORTER_PORT        default: 9633
   REQUEST_TIMEOUT      seconds, default: 15
+  STIGMAN_VERIFY_TLS   default: true. Set to a CA-bundle path (e.g.
+                       /certs/internal-ca.pem) to trust an internal CA, or
+                       "false" to disable TLS verification entirely (INSECURE
+                       — lab/self-signed only, never production).
 
 Run locally:   python3 stigman_exporter.py
 Metrics at:    http://localhost:9633/metrics
@@ -36,6 +40,25 @@ CLIENT_SECRET = os.environ.get("OIDC_CLIENT_SECRET", "")
 PORT = int(os.environ.get("EXPORTER_PORT", "9633"))
 TIMEOUT = float(os.environ.get("REQUEST_TIMEOUT", "15"))
 
+
+def _verify_tls():
+    """requests' `verify`: True/False, or a CA-bundle path string."""
+    raw = os.environ.get("STIGMAN_VERIFY_TLS", "true").strip()
+    if raw.lower() in ("false", "0", "no", "off"):
+        return False
+    if raw.lower() in ("true", "1", "yes", "on"):
+        return True
+    return raw  # treat as a path to a CA bundle
+
+
+VERIFY = _verify_tls()
+if VERIFY is False:
+    # Silence the per-request InsecureRequestWarning spam once, up front.
+    from urllib3.exceptions import InsecureRequestWarning
+    requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+    log.warning("TLS verification DISABLED (STIGMAN_VERIFY_TLS=false) — "
+                "insecure, use only in a lab/self-signed environment")
+
 CORA_WEIGHTS = {"high": 10.0, "medium": 4.0, "low": 1.0}
 
 
@@ -47,7 +70,7 @@ class TokenCache:
     def get(self):
         if self._token and time.time() < self._expires_at - 60:
             return self._token
-        resp = requests.post(TOKEN_URL, timeout=TIMEOUT, data={
+        resp = requests.post(TOKEN_URL, timeout=TIMEOUT, verify=VERIFY, data={
             "grant_type": "client_credentials",
             "client_id": CLIENT_ID,
             "client_secret": CLIENT_SECRET})
@@ -162,7 +185,8 @@ class StigmanCollector:
         token = self.tokens.get()
         resp = requests.get(
             f"{API_URL}/collections/meta/metrics/summary/collection",
-            headers={"Authorization": f"Bearer {token}"}, timeout=TIMEOUT)
+            headers={"Authorization": f"Bearer {token}"},
+            timeout=TIMEOUT, verify=VERIFY)
         resp.raise_for_status()
         return resp.json()
 
