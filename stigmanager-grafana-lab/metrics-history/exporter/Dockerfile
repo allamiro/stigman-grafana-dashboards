@@ -12,7 +12,8 @@ RUN adduser --system --no-create-home --group exporter
 WORKDIR /app
 COPY --chmod=0644 requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-COPY --chmod=0644 stigman_exporter.py .
+COPY --chmod=0764 stigman_exporter.py .
+RUN chmod 0764 /app/stigman_exporter.py /app/requirements.txt
 
 USER exporter
 EXPOSE 9633

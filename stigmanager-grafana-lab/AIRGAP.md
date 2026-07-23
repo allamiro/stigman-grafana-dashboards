@@ -183,11 +183,18 @@ KEYCLOAK_TOKEN_URL=https://sso.example.internal/realms/stigman/protocol/openid-c
 OIDC_CLIENT_ID=nexus-reporter
 OIDC_CLIENT_SECRET=<the secret from step 1.3>
 EXPORTER_PORT=9633
-# Private/internal CA (RECOMMENDED) — point the exporter at your CA bundle:
+# Private/internal CA (RECOMMENDED) — point the exporter at your CA bundle.
+# This is the GLOBAL default applied to BOTH the Keycloak and STIG Manager calls:
 # STIGMAN_VERIFY_TLS=/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
 #   (REQUESTS_CA_BUNDLE=<path> also works — requests honours it natively.)
+# Different cert chains per service? Override either endpoint independently
+# (each falls back to STIGMAN_VERIFY_TLS when unset). Same accepted values —
+# a CA-bundle path, "true", or "false":
+# KEYCLOAK_VERIFY_TLS=/certs/keycloak-ca.pem
+# STIGMAN_API_VERIFY_TLS=/certs/stigman-ca.pem
 # Lab / self-signed ONLY — turn TLS verification off entirely (INSECURE,
-# never production); logs a warning on startup:
+# never production); logs a warning on startup. Applies to whichever knob
+# you set it on (global or a single endpoint):
 # STIGMAN_VERIFY_TLS=false
 ```
 

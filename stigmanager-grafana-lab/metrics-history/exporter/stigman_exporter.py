@@ -14,10 +14,21 @@ Configuration (environment variables):
   OIDC_CLIENT_SECRET   (required)
   EXPORTER_PORT        default: 9633
   REQUEST_TIMEOUT      seconds, default: 15
-  STIGMAN_VERIFY_TLS   default: true. Set to a CA-bundle path (e.g.
-                       /certs/internal-ca.pem) to trust an internal CA, or
-                       "false" to disable TLS verification entirely (INSECURE
-                       — lab/self-signed only, never production).
+  STIGMAN_VERIFY_TLS   default: true. Global TLS-verification default for
+                       BOTH the Keycloak and STIG Manager calls. Set to a
+                       CA-bundle path (e.g. /certs/internal-ca.pem) to trust
+                       an internal CA, or "false" to disable verification
+                       entirely (INSECURE — lab/self-signed only, never
+                       production).
+  KEYCLOAK_VERIFY_TLS  optional per-endpoint override for the Keycloak token
+                       call only. Same accepted values as STIGMAN_VERIFY_TLS.
+                       Use when Keycloak's cert is issued by a different chain
+                       (e.g. /certs/keycloak-ca.pem). Falls back to
+                       STIGMAN_VERIFY_TLS when unset.
+  STIGMAN_API_VERIFY_TLS  optional per-endpoint override for the STIG Manager
+                       API call only. Same accepted values. Use when the API's
+                       cert is a different chain (e.g. /certs/stigman-ca.pem).
+                       Falls back to STIGMAN_VERIFY_TLS when unset.
 
 Run locally:   python3 stigman_exporter.py
 Metrics at:    http://localhost:9633/metrics
@@ -41,9 +52,10 @@ PORT = int(os.environ.get("EXPORTER_PORT", "9633"))
 TIMEOUT = float(os.environ.get("REQUEST_TIMEOUT", "15"))
 
 
-def _verify_tls():
-    """requests' `verify`: True/False, or a CA-bundle path string."""
-    raw = os.environ.get("STIGMAN_VERIFY_TLS", "true").strip()
+def _parse_verify(raw):
+    """Map a raw env value to requests' `verify`: True/False, or a
+    CA-bundle path string."""
+    raw = (raw or "").strip()
     if raw.lower() in ("false", "0", "no", "off"):
         return False
     if raw.lower() in ("true", "1", "yes", "on"):
@@ -51,13 +63,29 @@ def _verify_tls():
     return raw  # treat as a path to a CA bundle
 
 
-VERIFY = _verify_tls()
-if VERIFY is False:
+def _verify_for(name, fallback):
+    """Per-endpoint TLS-verify setting: use env var `name` if set,
+    otherwise the global `fallback` (from STIGMAN_VERIFY_TLS)."""
+    raw = os.environ.get(name)
+    if raw is None or raw.strip() == "":
+        return fallback
+    return _parse_verify(raw)
+
+
+# Global default applied to both endpoints, then optional per-endpoint
+# overrides for when Keycloak and STIG Manager use different cert chains.
+VERIFY = _parse_verify(os.environ.get("STIGMAN_VERIFY_TLS", "true"))
+KEYCLOAK_VERIFY = _verify_for("KEYCLOAK_VERIFY_TLS", VERIFY)
+API_VERIFY = _verify_for("STIGMAN_API_VERIFY_TLS", VERIFY)
+
+if False in (KEYCLOAK_VERIFY, API_VERIFY):
     # Silence the per-request InsecureRequestWarning spam once, up front.
     from urllib3.exceptions import InsecureRequestWarning
     requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-    log.warning("TLS verification DISABLED (STIGMAN_VERIFY_TLS=false) — "
-                "insecure, use only in a lab/self-signed environment")
+    disabled = [n for n, v in (("Keycloak", KEYCLOAK_VERIFY),
+                               ("STIG Manager API", API_VERIFY)) if v is False]
+    log.warning("TLS verification DISABLED for %s — insecure, use only in a "
+                "lab/self-signed environment", " and ".join(disabled))
 
 CORA_WEIGHTS = {"high": 10.0, "medium": 4.0, "low": 1.0}
 
@@ -70,7 +98,7 @@ class TokenCache:
     def get(self):
         if self._token and time.time() < self._expires_at - 60:
             return self._token
-        resp = requests.post(TOKEN_URL, timeout=TIMEOUT, verify=VERIFY, data={
+        resp = requests.post(TOKEN_URL, timeout=TIMEOUT, verify=KEYCLOAK_VERIFY, data={
             "grant_type": "client_credentials",
             "client_id": CLIENT_ID,
             "client_secret": CLIENT_SECRET})
@@ -186,7 +214,7 @@ class StigmanCollector:
         resp = requests.get(
             f"{API_URL}/collections/meta/metrics/summary/collection",
             headers={"Authorization": f"Bearer {token}"},
-            timeout=TIMEOUT, verify=VERIFY)
+            timeout=TIMEOUT, verify=API_VERIFY)
         resp.raise_for_status()
         return resp.json()
 
