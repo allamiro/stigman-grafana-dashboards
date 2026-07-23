@@ -117,6 +117,18 @@ reported:
 
 1. Make the user record exist: call the API once with a `nexus-reporter`
    token (`GET /api/collections` — a `200 []` response is expected and fine).
+
+   ```bash
+   # a. Fetch a service-account token (same client-credentials call as step 1.4)
+   TOKEN=$(curl -s https://sso.example.internal/realms/stigman/protocol/openid-connect/token \
+     -d grant_type=client_credentials -d client_id=nexus-reporter \
+     -d client_secret='<SECRET>' | jq -r .access_token)
+
+   # b. Hit the API once — a 200 with `[]` is correct and lazily creates the
+   #    service-account-nexus-reporter user record (no grants yet)
+   curl -s https://stigman.example.internal/api/collections \
+     -H "Authorization: Bearer $TOKEN" | jq
+   ```
 2. In the STIG Manager UI as a collection Manage/Owner user:
    *Collection → Manage → Grants → New grant* → user
    `service-account-nexus-reporter` → role **Restricted** → then edit that
@@ -133,9 +145,19 @@ reported:
    direct grant. If direct grants are disabled in production — they should
    be — use the UI path above instead.)
 
-Verify: `GET /api/collections` with the service token now lists the granted
-collections, and `GET /api/collections/<id>/metrics/summary/collection`
-returns metrics.
+Verify with the same `$TOKEN` from step 1 — `GET /api/collections` now lists
+the granted collections instead of `[]`, and the per-collection metrics
+endpoint returns data:
+
+```bash
+# granted collections
+curl -s https://stigman.example.internal/api/collections \
+  -H "Authorization: Bearer $TOKEN" | jq
+
+# metrics for one collection
+curl -s "https://stigman.example.internal/api/collections/<id>/metrics/summary/collection" \
+  -H "Authorization: Bearer $TOKEN" | jq
+```
 
 ## 3. Exporter on the Prometheus server
 
