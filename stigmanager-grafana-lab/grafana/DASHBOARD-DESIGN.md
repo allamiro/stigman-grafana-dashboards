@@ -6,8 +6,8 @@ library to generate dashboards"* and to *"write down your design guidelines to
 maintain consistency"* — this file is that, and the generator is that library.
 
 > Applies to the newer dashboards (Platform Health, Risk Forecast, CAT I War
-> Room, Review Backlog, Asset Inventory, Compliance Scorecard, Access &
-> Governance). The original set predates this guide.
+> Room, Review Backlog, Asset Inventory, Compliance Scorecard). The original
+> set predates this guide.
 
 ## 1. Context first — every dashboard has a goal
 
@@ -62,8 +62,10 @@ Trend panels with a target draw it as a **threshold line** (e.g. CORA ≤ 20).
 
 ## 6. Consistency mechanisms
 
-- **Generator** (`scripts`/scratch `ds.py`) — one helper library emits every
-  panel, so spacing, colours, and thresholds can't drift.
+- **Generate, don't hand-edit** — the boards are emitted from one small helper
+  library (shared colour tokens, threshold builders, panel factories) so
+  spacing, colours, and thresholds can't drift between boards. Regenerate rather
+  than tweaking JSON by hand.
 - **Template variable** `collection` on every scoped board (one board, not one
   per collection).
 - **Dashboard links** — a "STIG dashboards" dropdown on each board carries the
