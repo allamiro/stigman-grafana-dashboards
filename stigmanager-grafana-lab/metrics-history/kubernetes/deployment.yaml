@@ -23,9 +23,9 @@ spec:
       containers:
         - name: exporter
           # Build and push first:
-          #   docker build -t <registry>/stigman-exporter:1.0.0 metrics-history/exporter
-          #   docker push <registry>/stigman-exporter:1.0.0
-          image: stigman-exporter:1.0.0
+          #   docker build -t <registry>/stigman-exporter:1.1.0 metrics-history/exporter
+          #   docker push <registry>/stigman-exporter:1.1.0
+          image: stigman-exporter:1.1.0
           imagePullPolicy: IfNotPresent
           envFrom:
             - secretRef:

@@ -25,7 +25,7 @@ Grafana ──(PromQL)──> Prometheus ──scrape :9633──> stigman_expor
 |---|---|
 | This repository | `git clone` / zip |
 | Exporter Python deps | `pip download -r metrics-history/exporter/requirements.txt -d wheels/` (run on the same OS/arch/Python as the target, e.g. RHEL x86_64 / Python 3.9+) |
-| *(alternative)* exporter container image | `docker build -t stigman-exporter:1.0.0 metrics-history/exporter && docker save stigman-exporter:1.0.0 -o stigman-exporter-1.0.0.tar` |
+| *(alternative)* exporter container image | `docker build -t stigman-exporter:1.1.0 metrics-history/exporter && docker save stigman-exporter:1.1.0 -o stigman-exporter-1.1.0.tar` |
 | Infinity plugin zip | `curl -Lo infinity-3.11.1.zip "https://grafana.com/api/plugins/yesoreyeram-infinity-datasource/versions/3.11.1/download"` |
 | (if not already deployed) Grafana/Prometheus RPMs or images | vendor downloads |
 
@@ -227,9 +227,9 @@ curl -s http://localhost:9633/metrics | grep stigman_collection_cora_percent
 ### 3b. Or as a container
 
 ```bash
-docker load -i stigman-exporter-1.0.0.tar
+docker load -i stigman-exporter-1.1.0.tar
 docker run -d --name stigman-exporter --restart unless-stopped -p 9633:9633 \
-  --env-file /etc/stigman-exporter.env stigman-exporter:1.0.0
+  --env-file /etc/stigman-exporter.env stigman-exporter:1.1.0
 ```
 
 (Kubernetes: apply `metrics-history/kubernetes/` — namespace, secret,

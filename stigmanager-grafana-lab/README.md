@@ -64,7 +64,7 @@ Auth flows:
 | Grafana | `grafana/grafana` | 13.1.0 | |
 | Infinity datasource | `yesoreyeram-infinity-datasource` | 3.11.1 | requires Grafana ≥ 11.6 |
 | Prometheus | `prom/prometheus` | v3.13.1 | posture history (trends) |
-| stigman-exporter | built from `metrics-history/exporter` | 1.0.0 | Python 3.12 |
+| stigman-exporter | built from `metrics-history/exporter` | 1.1.0 | Python 3.12 |
 
 ## 4. Quick start (empty directory → dashboards)
 
@@ -352,7 +352,7 @@ math is identical to the dashboards.
 | Mode | How |
 |---|---|
 | Local (your box, no Docker) | `./metrics-history/local/run-local.sh` → http://localhost:9633/metrics (creates a venv, reads secrets from the lab `.env`) |
-| Docker standalone | `./metrics-history/docker/run-docker.sh` (builds `stigman-exporter:1.0.0`, `docker run -d`, port 9633) |
+| Docker standalone | `./metrics-history/docker/run-docker.sh` (builds `stigman-exporter:1.1.0`, `docker run -d`, port 9633) |
 | Kubernetes | `metrics-history/kubernetes/`: `kubectl apply -f namespace.yaml`, copy `secret.example.yaml` → `secret.yaml` (fill in secrets, not committed), apply `deployment.yaml` + `service.yaml`; `servicemonitor.yaml` if you run prometheus-operator. Build/push the image first (see comments in the manifests). |
 
 The compose stack also runs the exporter and Prometheus automatically
