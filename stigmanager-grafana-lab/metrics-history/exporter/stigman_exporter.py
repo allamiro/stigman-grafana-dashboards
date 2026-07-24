@@ -179,6 +179,15 @@ class StigmanCollector:
         g_touch = GaugeMetricFamily(
             "stigman_collection_last_touch_timestamp_seconds",
             "Unix time of the most recent review activity", labels=labels)
+        g_oldest = GaugeMetricFamily(
+            "stigman_collection_oldest_review_timestamp_seconds",
+            "Unix time of the oldest current review (metrics.minTs). "
+            "Subtract from time() for the age of the stalest review.",
+            labels=labels)
+        g_newest = GaugeMetricFamily(
+            "stigman_collection_newest_review_timestamp_seconds",
+            "Unix time of the newest review result (metrics.maxTs)",
+            labels=labels)
 
         for row in rows:
             lv = [str(row.get("collectionId", "")), row.get("name", "")]
@@ -201,12 +210,18 @@ class StigmanCollector:
             touch = m.get("maxTouchTs")
             if touch:
                 g_touch.add_metric(lv, _to_epoch(touch))
+            oldest = m.get("minTs")
+            if oldest:
+                g_oldest.add_metric(lv, _to_epoch(oldest))
+            newest = m.get("maxTs")
+            if newest:
+                g_newest.add_metric(lv, _to_epoch(newest))
 
         up.add_metric([], 1.0)
         duration.add_metric([], time.time() - started)
         for metric in (g_assess, g_assessed, g_assets, g_results, g_findings,
                        g_assess_sev, g_assessed_sev, g_statuses, g_cora,
-                       g_touch, up, duration):
+                       g_touch, g_oldest, g_newest, up, duration):
             yield metric
 
     def _fetch(self):

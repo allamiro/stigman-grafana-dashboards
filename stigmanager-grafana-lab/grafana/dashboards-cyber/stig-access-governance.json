@@ -1,0 +1,225 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Who has access to each collection and at what role.",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "type": "text",
+      "title": "",
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "## Access & Governance \u2014 Collection Grants\nWho can see and change the selected **Collection**, and at what role. Watch for **Owner/Manage** grants that shouldn't be there and **service accounts** (e.g. `nexus-reporter` should be *Restricted*, read-only).\n\n*Live from `/collections/{id}/grants`. Role IDs: 1 Restricted \u00b7 2 Full \u00b7 3 Manage \u00b7 4 Owner.*"
+      },
+      "id": 1
+    },
+    {
+      "type": "table",
+      "title": "Grants \u2014 $collection",
+      "description": "Every user grant on this collection and its role.",
+      "gridPos": {
+        "h": 16,
+        "w": 24,
+        "x": 0,
+        "y": 3
+      },
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "stigmanager-infinity"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "stigmanager-infinity"
+          },
+          "queryType": "infinity",
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://stigman:54000/api/collections/$collection/grants",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "",
+          "columns": [
+            {
+              "selector": "user.username",
+              "text": "Username",
+              "type": "string"
+            },
+            {
+              "selector": "user.displayName",
+              "text": "Display name",
+              "type": "string"
+            },
+            {
+              "selector": "roleId",
+              "text": "Role",
+              "type": "number"
+            },
+            {
+              "selector": "user.userId",
+              "text": "User ID",
+              "type": "string"
+            },
+            {
+              "selector": "grantId",
+              "text": "Grant ID",
+              "type": "string"
+            }
+          ],
+          "computed_columns": []
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        },
+        "sortBy": [
+          {
+            "displayName": "Role",
+            "desc": true
+          }
+        ]
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "filterable": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Role"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "1": {
+                        "text": "Restricted"
+                      },
+                      "2": {
+                        "text": "Full"
+                      },
+                      "3": {
+                        "text": "Manage"
+                      },
+                      "4": {
+                        "text": "Owner"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "id": 2
+    }
+  ],
+  "refresh": "5m",
+  "schemaVersion": 39,
+  "tags": [
+    "stig",
+    "posture",
+    "cyber",
+    "governance",
+    "grants",
+    "access"
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "collection",
+        "label": "Collection",
+        "type": "query",
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "stigmanager-infinity"
+        },
+        "refresh": 1,
+        "multi": false,
+        "includeAll": false,
+        "sort": 1,
+        "query": {
+          "queryType": "infinity",
+          "query": "",
+          "infinityQuery": {
+            "refId": "variable",
+            "queryType": "infinity",
+            "type": "json",
+            "source": "url",
+            "format": "table",
+            "parser": "backend",
+            "url": "http://stigman:54000/api/collections",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
+            "root_selector": "",
+            "columns": [
+              {
+                "selector": "name",
+                "text": "__text",
+                "type": "string"
+              },
+              {
+                "selector": "collectionId",
+                "text": "__value",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "current": {},
+        "options": []
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timezone": "browser",
+  "title": "STIG Posture \u2014 Access & Governance (Grants)",
+  "uid": "stig-access-governance",
+  "version": 1
+}

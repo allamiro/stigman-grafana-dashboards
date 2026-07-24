@@ -196,7 +196,7 @@ services:
   # --- metrics history (trends): exporter + Prometheus -------------------
   stigman-exporter:
     build: ./metrics-history/exporter
-    image: stigman-exporter:1.1.0
+    image: stigman-exporter:1.2.0
     container_name: sml-stigman-exporter
     restart: unless-stopped
     depends_on:

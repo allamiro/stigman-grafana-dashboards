@@ -1,0 +1,308 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Per-STIG compliance and outdated-revision detection.",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "type": "text",
+      "title": "",
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "## Compliance Scorecard by STIG + Benchmark Currency\nPer-STIG compliance for the selected **Collection**, joined to the STIG **library** so you can spot **outdated benchmark revisions**: compare *Rev in use* against *Latest rev*. `Pinned = true` means the collection is frozen on an old revision on purpose (or by neglect).\n\n*Two live queries joined on benchmarkId.*"
+      },
+      "id": 1
+    },
+    {
+      "type": "table",
+      "title": "Per-STIG compliance & revision currency \u2014 $collection",
+      "description": "Coverage per STIG plus whether the collection is on the latest published revision.",
+      "gridPos": {
+        "h": 16,
+        "w": 24,
+        "x": 0,
+        "y": 3
+      },
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "stigmanager-infinity"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "stigmanager-infinity"
+          },
+          "queryType": "infinity",
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://stigman:54000/api/collections/$collection/metrics/summary/stig",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "",
+          "columns": [
+            {
+              "selector": "benchmarkId",
+              "text": "benchmarkId",
+              "type": "string"
+            },
+            {
+              "selector": "title",
+              "text": "STIG",
+              "type": "string"
+            },
+            {
+              "selector": "revisionStr",
+              "text": "Rev in use",
+              "type": "string"
+            },
+            {
+              "selector": "revisionPinned",
+              "text": "Pinned",
+              "type": "boolean"
+            },
+            {
+              "selector": "assets",
+              "text": "Assets",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.assessments",
+              "text": "assessments",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.assessed",
+              "text": "assessed",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.findings.high",
+              "text": "CAT I",
+              "type": "number"
+            },
+            {
+              "selector": "metrics.findings.medium",
+              "text": "CAT II",
+              "type": "number"
+            }
+          ],
+          "computed_columns": [
+            {
+              "selector": "assessments > 0 ? assessed / assessments * 100 : 0",
+              "text": "Coverage %",
+              "type": "number"
+            }
+          ]
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "stigmanager-infinity"
+          },
+          "queryType": "infinity",
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://stigman:54000/api/stigs",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "",
+          "columns": [
+            {
+              "selector": "benchmarkId",
+              "text": "benchmarkId",
+              "type": "string"
+            },
+            {
+              "selector": "lastRevisionStr",
+              "text": "Latest rev",
+              "type": "string"
+            },
+            {
+              "selector": "lastRevisionDate",
+              "text": "Latest date",
+              "type": "string"
+            }
+          ],
+          "computed_columns": []
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        },
+        "sortBy": [
+          {
+            "displayName": "Coverage %",
+            "desc": false
+          }
+        ]
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "filterable": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Coverage %"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "gradient"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 80
+                    },
+                    {
+                      "color": "green",
+                      "value": 95
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "id": 2,
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "benchmarkId",
+            "mode": "inner"
+          }
+        }
+      ]
+    }
+  ],
+  "refresh": "5m",
+  "schemaVersion": 39,
+  "tags": [
+    "stig",
+    "posture",
+    "cyber",
+    "compliance",
+    "benchmark"
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "collection",
+        "label": "Collection",
+        "type": "query",
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "stigmanager-infinity"
+        },
+        "refresh": 1,
+        "multi": false,
+        "includeAll": false,
+        "sort": 1,
+        "query": {
+          "queryType": "infinity",
+          "query": "",
+          "infinityQuery": {
+            "refId": "variable",
+            "queryType": "infinity",
+            "type": "json",
+            "source": "url",
+            "format": "table",
+            "parser": "backend",
+            "url": "http://stigman:54000/api/collections",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
+            "root_selector": "",
+            "columns": [
+              {
+                "selector": "name",
+                "text": "__text",
+                "type": "string"
+              },
+              {
+                "selector": "collectionId",
+                "text": "__value",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "current": {},
+        "options": []
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timezone": "browser",
+  "title": "STIG Posture \u2014 Compliance Scorecard & Benchmark Currency",
+  "uid": "stig-compliance-scorecard",
+  "version": 1
+}

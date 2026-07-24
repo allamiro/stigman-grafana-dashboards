@@ -7,7 +7,7 @@ set -euo pipefail
 cd "$(dirname "$0")/../.."
 source .env
 
-docker build -t stigman-exporter:1.1.0 metrics-history/exporter
+docker build -t stigman-exporter:1.2.0 metrics-history/exporter
 
 docker rm -f stigman-exporter 2>/dev/null || true
 docker run -d --name stigman-exporter \
@@ -17,6 +17,6 @@ docker run -d --name stigman-exporter \
   -e KEYCLOAK_TOKEN_URL="${KEYCLOAK_TOKEN_URL:-http://host.docker.internal:8180/realms/stigman/protocol/openid-connect/token}" \
   -e OIDC_CLIENT_ID="${NEXUS_REPORTER_CLIENT_ID:-nexus-reporter}" \
   -e OIDC_CLIENT_SECRET="$NEXUS_REPORTER_CLIENT_SECRET" \
-  stigman-exporter:1.1.0
+  stigman-exporter:1.2.0
 
 echo "exporter running: http://localhost:9633/metrics"
