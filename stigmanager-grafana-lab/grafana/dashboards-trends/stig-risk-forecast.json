@@ -15,37 +15,65 @@
       }
     ]
   },
-  "description": "CORA risk trend, velocity, and linear forecast for leadership.",
+  "description": "CORA risk trend, velocity, and forecast for leadership.",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "links": [],
+  "links": [
+    {
+      "asDropdown": true,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [
+        "stig",
+        "posture"
+      ],
+      "title": "STIG dashboards",
+      "type": "dashboards",
+      "targetBlank": false
+    }
+  ],
   "liveNow": false,
   "panels": [
     {
       "type": "text",
       "title": "",
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 0
       },
       "options": {
         "mode": "markdown",
-        "content": "## Risk Posture Trend & Forecast (CORA)\nCORA is a **weighted risk score (0\u2013100, lower is better)**. This is the leadership view: which way is risk moving, how fast, and \u2014 on the current trajectory \u2014 when do we hit target. *Top movers* below rank collections by week-over-week change. Filter with the **Collections** variable.\n\n*Forecast uses `predict_linear` over the last 14 days \u2014 indicative, not a promise.*"
+        "content": "## Risk Posture Trend & Forecast (CORA)\n**Question this answers:** which way is risk moving, how fast, and \u2014 on the current trajectory \u2014 do we hit target? CORA is a **weighted risk score (0\u2013100, lower is better)**. *Bottom line \u2192 trend \u2192 who's moving.* Filter with **Collections**. Forecast is `predict_linear` over 14 days \u2014 indicative."
       },
+      "transparent": true,
       "id": 1
+    },
+    {
+      "type": "row",
+      "title": "Bottom line",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      },
+      "id": 2,
+      "panels": []
     },
     {
       "type": "stat",
       "title": "Org risk now (CORA)",
-      "description": "Mean CORA across selected collections, latest sample. Lower is better.",
+      "description": "Mean CORA across selected collections. Lower is better.",
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 6,
         "x": 0,
-        "y": 3
+        "y": 5
       },
       "datasource": {
         "type": "prometheus",
@@ -75,8 +103,8 @@
         "colorMode": "background",
         "graphMode": "area",
         "justifyMode": "auto",
+        "textMode": "value_and_name",
         "orientation": "auto",
-        "textMode": "auto",
         "wideLayout": true
       },
       "fieldConfig": {
@@ -87,15 +115,15 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "#0ca30c",
                 "value": null
               },
               {
-                "color": "yellow",
+                "color": "#fab219",
                 "value": 20
               },
               {
-                "color": "red",
+                "color": "#d03b3b",
                 "value": 40
               }
             ]
@@ -106,17 +134,17 @@
         },
         "overrides": []
       },
-      "id": 2
+      "id": 3
     },
     {
       "type": "stat",
       "title": "7-day change",
-      "description": "CORA now minus CORA 7 days ago. Negative (green) = risk falling.",
+      "description": "CORA now minus 7 days ago. Negative = risk falling.",
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 6,
         "x": 6,
-        "y": 3
+        "y": 5
       },
       "datasource": {
         "type": "prometheus",
@@ -146,8 +174,8 @@
         "colorMode": "background",
         "graphMode": "none",
         "justifyMode": "auto",
+        "textMode": "value_and_name",
         "orientation": "auto",
-        "textMode": "auto",
         "wideLayout": true
       },
       "fieldConfig": {
@@ -158,15 +186,11 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "#0ca30c",
                 "value": null
               },
               {
-                "color": "yellow",
-                "value": 0
-              },
-              {
-                "color": "red",
+                "color": "#d03b3b",
                 "value": 0.001
               }
             ]
@@ -177,17 +201,17 @@
         },
         "overrides": []
       },
-      "id": 3
+      "id": 4
     },
     {
       "type": "stat",
       "title": "30-day change",
-      "description": "CORA now minus CORA 30 days ago.",
+      "description": "CORA now minus 30 days ago.",
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 6,
         "x": 12,
-        "y": 3
+        "y": 5
       },
       "datasource": {
         "type": "prometheus",
@@ -217,8 +241,8 @@
         "colorMode": "background",
         "graphMode": "none",
         "justifyMode": "auto",
+        "textMode": "value_and_name",
         "orientation": "auto",
-        "textMode": "auto",
         "wideLayout": true
       },
       "fieldConfig": {
@@ -229,15 +253,11 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "#0ca30c",
                 "value": null
               },
               {
-                "color": "yellow",
-                "value": 0
-              },
-              {
-                "color": "red",
+                "color": "#d03b3b",
                 "value": 0.001
               }
             ]
@@ -248,17 +268,17 @@
         },
         "overrides": []
       },
-      "id": 4
+      "id": 5
     },
     {
       "type": "stat",
-      "title": "Projected CORA in 30d",
-      "description": "Linear projection of org CORA 30 days out, from the last 14 days of trend.",
+      "title": "Projected in 30d",
+      "description": "Linear projection of org CORA 30 days out.",
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 6,
         "x": 18,
-        "y": 3
+        "y": 5
       },
       "datasource": {
         "type": "prometheus",
@@ -288,8 +308,8 @@
         "colorMode": "background",
         "graphMode": "area",
         "justifyMode": "auto",
+        "textMode": "value_and_name",
         "orientation": "auto",
-        "textMode": "auto",
         "wideLayout": true
       },
       "fieldConfig": {
@@ -300,15 +320,15 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "#0ca30c",
                 "value": null
               },
               {
-                "color": "yellow",
+                "color": "#fab219",
                 "value": 20
               },
               {
-                "color": "red",
+                "color": "#d03b3b",
                 "value": 40
               }
             ]
@@ -319,17 +339,30 @@
         },
         "overrides": []
       },
-      "id": 5
+      "id": 6
+    },
+    {
+      "type": "row",
+      "title": "Trend (target \u2264 20%)",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 10
+      },
+      "id": 7,
+      "panels": []
     },
     {
       "type": "timeseries",
-      "title": "CORA % over time (per collection + org average)",
+      "title": "CORA % over time \u2014 per collection + org average",
       "description": "",
       "gridPos": {
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 9
+        "y": 11
       },
       "datasource": {
         "type": "prometheus",
@@ -365,7 +398,10 @@
         "legend": {
           "displayMode": "list",
           "placement": "bottom",
-          "calcs": []
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
         },
         "tooltip": {
           "mode": "multi",
@@ -379,27 +415,78 @@
           "custom": {
             "drawStyle": "line",
             "lineInterpolation": "smooth",
+            "lineWidth": 2,
             "fillOpacity": 10,
             "showPoints": "never",
-            "spanNulls": true
+            "spanNulls": true,
+            "axisGridShow": true,
+            "thresholdsStyle": {
+              "mode": "line"
+            }
           },
           "color": {
             "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "transparent",
+                "value": null
+              },
+              {
+                "color": "#fab219",
+                "value": 20
+              }
+            ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Org average"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#0b0b0b"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 3
+              }
+            ]
+          }
+        ]
       },
-      "id": 6
+      "id": 8
+    },
+    {
+      "type": "row",
+      "title": "Who is moving",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 21
+      },
+      "id": 9,
+      "panels": []
     },
     {
       "type": "timeseries",
-      "title": "Week-over-week CORA change (top movers)",
+      "title": "Week-over-week CORA change (negative = improved)",
       "description": "",
       "gridPos": {
         "h": 9,
-        "w": 24,
+        "w": 12,
         "x": 0,
-        "y": 19
+        "y": 22
       },
       "datasource": {
         "type": "prometheus",
@@ -423,7 +510,10 @@
         "legend": {
           "displayMode": "list",
           "placement": "bottom",
-          "calcs": []
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
         },
         "tooltip": {
           "mode": "multi",
@@ -437,9 +527,11 @@
           "custom": {
             "drawStyle": "line",
             "lineInterpolation": "smooth",
-            "fillOpacity": 0,
+            "lineWidth": 2,
+            "fillOpacity": 10,
             "showPoints": "never",
-            "spanNulls": true
+            "spanNulls": true,
+            "axisGridShow": true
           },
           "color": {
             "mode": "palette-classic"
@@ -447,17 +539,17 @@
         },
         "overrides": []
       },
-      "id": 7
+      "id": 10
     },
     {
       "type": "table",
-      "title": "Top movers \u2014 7-day CORA delta (negative = improved)",
+      "title": "Top movers \u2014 7-day CORA delta",
       "description": "",
       "gridPos": {
-        "h": 10,
-        "w": 24,
-        "x": 0,
-        "y": 28
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 22
       },
       "datasource": {
         "type": "prometheus",
@@ -523,11 +615,11 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "green",
+                      "color": "#0ca30c",
                       "value": null
                     },
                     {
-                      "color": "red",
+                      "color": "#d03b3b",
                       "value": 0.001
                     }
                   ]
@@ -537,7 +629,7 @@
           }
         ]
       },
-      "id": 8
+      "id": 11
     }
   ],
   "refresh": "1m",
@@ -547,8 +639,7 @@
     "posture",
     "management",
     "trends",
-    "risk",
-    "cora"
+    "risk"
   ],
   "templating": {
     "list": [
@@ -589,5 +680,5 @@
   "timezone": "browser",
   "title": "STIG Posture \u2014 Risk Trend & Forecast (CORA)",
   "uid": "stig-risk-forecast",
-  "version": 1
+  "version": 2
 }

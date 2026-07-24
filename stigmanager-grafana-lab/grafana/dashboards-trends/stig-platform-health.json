@@ -19,33 +19,61 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "links": [],
+  "links": [
+    {
+      "asDropdown": true,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [
+        "stig",
+        "posture"
+      ],
+      "title": "STIG dashboards",
+      "type": "dashboards",
+      "targetBlank": false
+    }
+  ],
   "liveNow": false,
   "panels": [
     {
       "type": "text",
       "title": "",
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 0
       },
       "options": {
         "mode": "markdown",
-        "content": "## STIG Manager Platform Health\nIs the metrics pipeline itself alive? This watches the **exporter \u2192 STIG Manager/Keycloak** scrape, not posture. If `Scrape status` is DOWN or the last success is stale, trends everywhere else stop updating.\n\n*Datasource: Prometheus. Add an alert on `stigman_scrape_success == 0`.*"
+        "content": "## STIG Manager \u2014 Platform Health\n**Goal:** confirm the metrics pipeline itself is alive. This watches the **exporter \u2192 STIG Manager / Keycloak** scrape, not posture \u2014 if it's DOWN or the last success is stale, every trend elsewhere silently stops updating.\n*Read top-to-bottom: status now \u2192 behaviour over time. Alert on `stigman_scrape_success == 0`.*"
       },
+      "transparent": true,
       "id": 1
+    },
+    {
+      "type": "row",
+      "title": "Pipeline status now",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      },
+      "id": 2,
+      "panels": []
     },
     {
       "type": "stat",
       "title": "Scrape status",
-      "description": "1 = last scrape of the STIG Manager API succeeded.",
+      "description": "1 = the last API scrape succeeded.",
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 6,
         "x": 0,
-        "y": 3
+        "y": 5
       },
       "datasource": {
         "type": "prometheus",
@@ -75,8 +103,8 @@
         "colorMode": "background",
         "graphMode": "none",
         "justifyMode": "auto",
+        "textMode": "value_and_name",
         "orientation": "auto",
-        "textMode": "auto",
         "wideLayout": true
       },
       "fieldConfig": {
@@ -87,11 +115,11 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
+                "color": "#d03b3b",
                 "value": null
               },
               {
-                "color": "green",
+                "color": "#0ca30c",
                 "value": 1
               }
             ]
@@ -104,12 +132,10 @@
               "type": "value",
               "options": {
                 "0": {
-                  "text": "DOWN",
-                  "color": "red"
+                  "text": "DOWN"
                 },
                 "1": {
-                  "text": "UP",
-                  "color": "green"
+                  "text": "UP"
                 }
               }
             }
@@ -117,17 +143,17 @@
         },
         "overrides": []
       },
-      "id": 2
+      "id": 3
     },
     {
       "type": "stat",
       "title": "Time since last success",
-      "description": "Seconds since the last successful scrape. Rising = pipeline stalled.",
+      "description": "Seconds since the last good scrape. Rising = stalled.",
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 6,
         "x": 6,
-        "y": 3
+        "y": 5
       },
       "datasource": {
         "type": "prometheus",
@@ -155,10 +181,10 @@
           ]
         },
         "colorMode": "background",
-        "graphMode": "none",
+        "graphMode": "area",
         "justifyMode": "auto",
+        "textMode": "value_and_name",
         "orientation": "auto",
-        "textMode": "auto",
         "wideLayout": true
       },
       "fieldConfig": {
@@ -169,16 +195,16 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "#0ca30c",
                 "value": null
               },
               {
-                "color": "yellow",
-                "value": 300
+                "color": "#fab219",
+                "value": 302.40000000000003
               },
               {
-                "color": "red",
-                "value": 900
+                "color": "#d03b3b",
+                "value": 898.56
               }
             ]
           },
@@ -188,17 +214,17 @@
         },
         "overrides": []
       },
-      "id": 3
+      "id": 4
     },
     {
       "type": "stat",
       "title": "Scrape duration",
       "description": "How long the last scrape took (token + API).",
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 6,
         "x": 12,
-        "y": 3
+        "y": 5
       },
       "datasource": {
         "type": "prometheus",
@@ -228,8 +254,8 @@
         "colorMode": "background",
         "graphMode": "area",
         "justifyMode": "auto",
+        "textMode": "value_and_name",
         "orientation": "auto",
-        "textMode": "auto",
         "wideLayout": true
       },
       "fieldConfig": {
@@ -240,15 +266,15 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "#0ca30c",
                 "value": null
               },
               {
-                "color": "yellow",
+                "color": "#fab219",
                 "value": 5
               },
               {
-                "color": "red",
+                "color": "#d03b3b",
                 "value": 12
               }
             ]
@@ -259,17 +285,17 @@
         },
         "overrides": []
       },
-      "id": 4
+      "id": 5
     },
     {
       "type": "stat",
       "title": "Collections tracked",
-      "description": "Number of collections returned by the last scrape.",
+      "description": "Collections returned by the last scrape.",
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 6,
         "x": 18,
-        "y": 3
+        "y": 5
       },
       "datasource": {
         "type": "prometheus",
@@ -296,11 +322,11 @@
             "lastNotNull"
           ]
         },
-        "colorMode": "value",
+        "colorMode": "background",
         "graphMode": "area",
         "justifyMode": "auto",
+        "textMode": "value_and_name",
         "orientation": "auto",
-        "textMode": "auto",
         "wideLayout": true
       },
       "fieldConfig": {
@@ -311,11 +337,11 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
+                "color": "#d03b3b",
                 "value": null
               },
               {
-                "color": "green",
+                "color": "#0ca30c",
                 "value": 1
               }
             ]
@@ -326,17 +352,30 @@
         },
         "overrides": []
       },
-      "id": 5
+      "id": 6
+    },
+    {
+      "type": "row",
+      "title": "Behaviour over time",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 10
+      },
+      "id": 7,
+      "panels": []
     },
     {
       "type": "timeseries",
-      "title": "Scrape success (up/down) over time",
+      "title": "Scrape success (up/down)",
       "description": "",
       "gridPos": {
         "h": 9,
         "w": 12,
         "x": 0,
-        "y": 9
+        "y": 11
       },
       "datasource": {
         "type": "prometheus",
@@ -358,7 +397,7 @@
       ],
       "options": {
         "legend": {
-          "displayMode": "list",
+          "displayMode": "hidden",
           "placement": "bottom",
           "calcs": []
         },
@@ -374,40 +413,45 @@
           "custom": {
             "drawStyle": "line",
             "lineInterpolation": "smooth",
-            "fillOpacity": 30,
+            "lineWidth": 2,
+            "fillOpacity": 10,
             "showPoints": "never",
-            "spanNulls": true
+            "spanNulls": true,
+            "axisGridShow": true
           },
           "color": {
             "mode": "palette-classic"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "scrape success"
+            },
+            "properties": [
               {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "green",
-                "value": 1
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#0ca30c"
+                }
               }
             ]
           }
-        },
-        "overrides": []
+        ]
       },
-      "id": 6
+      "id": 8
     },
     {
       "type": "timeseries",
-      "title": "Scrape duration over time",
+      "title": "Scrape duration",
       "description": "",
       "gridPos": {
         "h": 9,
         "w": 12,
         "x": 12,
-        "y": 9
+        "y": 11
       },
       "datasource": {
         "type": "prometheus",
@@ -429,7 +473,7 @@
       ],
       "options": {
         "legend": {
-          "displayMode": "list",
+          "displayMode": "hidden",
           "placement": "bottom",
           "calcs": []
         },
@@ -445,9 +489,11 @@
           "custom": {
             "drawStyle": "line",
             "lineInterpolation": "smooth",
+            "lineWidth": 2,
             "fillOpacity": 10,
             "showPoints": "never",
-            "spanNulls": true
+            "spanNulls": true,
+            "axisGridShow": true
           },
           "color": {
             "mode": "palette-classic"
@@ -455,17 +501,17 @@
         },
         "overrides": []
       },
-      "id": 7
+      "id": 9
     },
     {
       "type": "timeseries",
-      "title": "Collections tracked over time",
+      "title": "Collections tracked",
       "description": "",
       "gridPos": {
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 20
       },
       "datasource": {
         "type": "prometheus",
@@ -487,7 +533,7 @@
       ],
       "options": {
         "legend": {
-          "displayMode": "list",
+          "displayMode": "hidden",
           "placement": "bottom",
           "calcs": []
         },
@@ -503,9 +549,11 @@
           "custom": {
             "drawStyle": "line",
             "lineInterpolation": "smooth",
+            "lineWidth": 2,
             "fillOpacity": 10,
             "showPoints": "never",
-            "spanNulls": true
+            "spanNulls": true,
+            "axisGridShow": true
           },
           "color": {
             "mode": "palette-classic"
@@ -513,17 +561,17 @@
         },
         "overrides": []
       },
-      "id": 8
+      "id": 10
     }
   ],
   "refresh": "1m",
   "schemaVersion": 39,
   "tags": [
     "stig",
+    "posture",
     "platform",
     "health",
-    "sre",
-    "ops"
+    "sre"
   ],
   "templating": {
     "list": []
@@ -535,5 +583,5 @@
   "timezone": "browser",
   "title": "STIG Manager \u2014 Platform Health",
   "uid": "stig-platform-health",
-  "version": 1
+  "version": 2
 }

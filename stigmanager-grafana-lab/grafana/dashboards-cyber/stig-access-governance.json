@@ -19,33 +19,61 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "links": [],
+  "links": [
+    {
+      "asDropdown": true,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [
+        "stig",
+        "posture"
+      ],
+      "title": "STIG dashboards",
+      "type": "dashboards",
+      "targetBlank": false
+    }
+  ],
   "liveNow": false,
   "panels": [
     {
       "type": "text",
       "title": "",
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 0
       },
       "options": {
         "mode": "markdown",
-        "content": "## Access & Governance \u2014 Collection Grants\nWho can see and change the selected **Collection**, and at what role. Watch for **Owner/Manage** grants that shouldn't be there and **service accounts** (e.g. `nexus-reporter` should be *Restricted*, read-only).\n\n*Live from `/collections/{id}/grants`. Role IDs: 1 Restricted \u00b7 2 Full \u00b7 3 Manage \u00b7 4 Owner.*"
+        "content": "## Access & Governance \u2014 Collection Grants\n**Goal:** know who can see and change the selected **Collection**, and at what role. Elevated roles are coloured (**Owner/Manage = hot**); watch for service accounts that should stay **Restricted** (read-only), e.g. `nexus-reporter`.\n*Role IDs: 1 Restricted \u00b7 2 Full \u00b7 3 Manage \u00b7 4 Owner.*"
       },
+      "transparent": true,
       "id": 1
+    },
+    {
+      "type": "row",
+      "title": "Grants",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      },
+      "id": 2,
+      "panels": []
     },
     {
       "type": "table",
       "title": "Grants \u2014 $collection",
       "description": "Every user grant on this collection and its role.",
       "gridPos": {
-        "h": 16,
+        "h": 18,
         "w": 24,
         "x": 0,
-        "y": 3
+        "y": 5
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
@@ -133,26 +161,37 @@
                     "type": "value",
                     "options": {
                       "1": {
-                        "text": "Restricted"
+                        "text": "Restricted",
+                        "color": "#0ca30c"
                       },
                       "2": {
-                        "text": "Full"
+                        "text": "Full",
+                        "color": "#fab219"
                       },
                       "3": {
-                        "text": "Manage"
+                        "text": "Manage",
+                        "color": "#ec835a"
                       },
                       "4": {
-                        "text": "Owner"
+                        "text": "Owner",
+                        "color": "#d03b3b"
                       }
                     }
                   }
                 ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
               }
             ]
           }
         ]
       },
-      "id": 2
+      "id": 3
     }
   ],
   "refresh": "5m",
@@ -162,8 +201,7 @@
     "posture",
     "cyber",
     "governance",
-    "grants",
-    "access"
+    "grants"
   ],
   "templating": {
     "list": [
@@ -221,5 +259,5 @@
   "timezone": "browser",
   "title": "STIG Posture \u2014 Access & Governance (Grants)",
   "uid": "stig-access-governance",
-  "version": 1
+  "version": 2
 }

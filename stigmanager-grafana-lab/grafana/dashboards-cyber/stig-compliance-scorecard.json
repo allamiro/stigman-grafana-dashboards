@@ -19,33 +19,283 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "links": [],
+  "links": [
+    {
+      "asDropdown": true,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [
+        "stig",
+        "posture"
+      ],
+      "title": "STIG dashboards",
+      "type": "dashboards",
+      "targetBlank": false
+    }
+  ],
   "liveNow": false,
   "panels": [
     {
       "type": "text",
       "title": "",
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 0
       },
       "options": {
         "mode": "markdown",
-        "content": "## Compliance Scorecard by STIG + Benchmark Currency\nPer-STIG compliance for the selected **Collection**, joined to the STIG **library** so you can spot **outdated benchmark revisions**: compare *Rev in use* against *Latest rev*. `Pinned = true` means the collection is frozen on an old revision on purpose (or by neglect).\n\n*Two live queries joined on benchmarkId.*"
+        "content": "## Compliance Scorecard by STIG + Benchmark Currency\n**Question:** per-STIG, how compliant are we and **are we on the latest benchmark revision?** The table joins the collection's in-use STIGs to the STIG **library** \u2014 compare *Rev in use* vs *Latest rev*. `Pinned = true` means the collection is frozen on an old revision (on purpose, or by neglect)."
       },
+      "transparent": true,
       "id": 1
     },
     {
+      "type": "row",
+      "title": "Collection at a glance",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      },
+      "id": 2,
+      "panels": []
+    },
+    {
+      "type": "stat",
+      "title": "Collection CORA (risk)",
+      "description": "Weighted risk score, lower is better.",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 5
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "stigmanager-prometheus"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "stigmanager-prometheus"
+          },
+          "expr": "stigman_collection_cora_percent{collection_name=~\"${collection:text}\"}",
+          "editorMode": "code",
+          "legendFormat": "__auto",
+          "range": true,
+          "instant": false
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "textMode": "value_and_name",
+        "orientation": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#0ca30c",
+                "value": null
+              },
+              {
+                "color": "#fab219",
+                "value": 20
+              },
+              {
+                "color": "#d03b3b",
+                "value": 40
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "id": 3
+    },
+    {
+      "type": "stat",
+      "title": "Coverage %",
+      "description": "Assessed / required.",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 8,
+        "y": 5
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "stigmanager-prometheus"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "stigmanager-prometheus"
+          },
+          "expr": "stigman_collection_assessed{collection_name=~\"${collection:text}\"} / clamp_min(stigman_collection_assessments{collection_name=~\"${collection:text}\"}, 1) * 100",
+          "editorMode": "code",
+          "legendFormat": "__auto",
+          "range": true,
+          "instant": false
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "textMode": "value_and_name",
+        "orientation": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#d03b3b",
+                "value": null
+              },
+              {
+                "color": "#fab219",
+                "value": 80
+              },
+              {
+                "color": "#0ca30c",
+                "value": 95
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "id": 4
+    },
+    {
+      "type": "stat",
+      "title": "Open CAT I",
+      "description": "Open CAT I in the collection.",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 16,
+        "y": 5
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "stigmanager-prometheus"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "stigmanager-prometheus"
+          },
+          "expr": "stigman_collection_findings{collection_name=~\"${collection:text}\",severity=\"high\"}",
+          "editorMode": "code",
+          "legendFormat": "__auto",
+          "range": true,
+          "instant": false
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "value_and_name",
+        "orientation": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#0ca30c",
+                "value": null
+              },
+              {
+                "color": "#d03b3b",
+                "value": 1
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "id": 5
+    },
+    {
+      "type": "row",
+      "title": "Per-STIG compliance & revision currency",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 10
+      },
+      "id": 6,
+      "panels": []
+    },
+    {
       "type": "table",
-      "title": "Per-STIG compliance & revision currency \u2014 $collection",
-      "description": "Coverage per STIG plus whether the collection is on the latest published revision.",
+      "title": "Per-STIG compliance & currency \u2014 $collection",
+      "description": "Coverage per STIG plus whether the collection is on the latest revision.",
       "gridPos": {
         "h": 16,
         "w": 24,
         "x": 0,
-        "y": 3
+        "y": 11
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
@@ -209,16 +459,78 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "red",
+                      "color": "#d03b3b",
                       "value": null
                     },
                     {
-                      "color": "yellow",
+                      "color": "#fab219",
                       "value": 80
                     },
                     {
-                      "color": "green",
+                      "color": "#0ca30c",
                       "value": 95
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CAT I"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "gradient"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "#0ca30c",
+                      "value": null
+                    },
+                    {
+                      "color": "#fab219",
+                      "value": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CAT II"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "gradient"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "#0ca30c",
+                      "value": null
+                    },
+                    {
+                      "color": "#fab219",
+                      "value": 1
                     }
                   ]
                 }
@@ -227,7 +539,7 @@
           }
         ]
       },
-      "id": 2,
+      "id": 7,
       "transformations": [
         {
           "id": "joinByField",
@@ -245,8 +557,7 @@
     "stig",
     "posture",
     "cyber",
-    "compliance",
-    "benchmark"
+    "compliance"
   ],
   "templating": {
     "list": [
@@ -304,5 +615,5 @@
   "timezone": "browser",
   "title": "STIG Posture \u2014 Compliance Scorecard & Benchmark Currency",
   "uid": "stig-compliance-scorecard",
-  "version": 1
+  "version": 2
 }

@@ -15,37 +15,65 @@
       }
     ]
   },
-  "description": "CAT I (high) open findings: enterprise history + live per-collection rule detail.",
+  "description": "CAT I open findings: enterprise history + live per-collection detail.",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "links": [],
+  "links": [
+    {
+      "asDropdown": true,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [
+        "stig",
+        "posture"
+      ],
+      "title": "STIG dashboards",
+      "type": "dashboards",
+      "targetBlank": false
+    }
+  ],
   "liveNow": false,
   "panels": [
     {
       "type": "text",
       "title": "",
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 0
       },
       "options": {
         "mode": "markdown",
-        "content": "## CAT I Open-Findings War Room\nCAT I (severity **high**) are the findings that fail you at audit. Top row and left trends are **enterprise-wide** (all collections, from Prometheus history). The **live table** and per-collection trend on the right follow the **Collection** selector and hit the STIG Manager API directly for current rule detail.\n\n*Left/stats: Prometheus. Right table: Infinity (live).*"
+        "content": "## CAT I Open-Findings War Room\n**Goal:** drive open **CAT I (severity high)** to zero \u2014 the findings that fail you at audit. Top row + left trends are **enterprise** history (Prometheus); the **live table** and right trend follow the **Collection** selector and pull current rule detail from the API. *Now \u2192 trend \u2192 the actual rules.*"
       },
+      "transparent": true,
       "id": 1
     },
     {
-      "type": "stat",
-      "title": "Open CAT I now",
-      "description": "Total open CAT I findings across all collections, latest sample.",
+      "type": "row",
+      "title": "Enterprise CAT I now",
+      "collapsed": false,
       "gridPos": {
-        "h": 6,
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      },
+      "id": 2,
+      "panels": []
+    },
+    {
+      "type": "stat",
+      "title": "Open CAT I",
+      "description": "Total open CAT I across all collections.",
+      "gridPos": {
+        "h": 5,
         "w": 6,
         "x": 0,
-        "y": 3
+        "y": 5
       },
       "datasource": {
         "type": "prometheus",
@@ -75,8 +103,8 @@
         "colorMode": "background",
         "graphMode": "area",
         "justifyMode": "auto",
+        "textMode": "value_and_name",
         "orientation": "auto",
-        "textMode": "auto",
         "wideLayout": true
       },
       "fieldConfig": {
@@ -87,11 +115,11 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "#0ca30c",
                 "value": null
               },
               {
-                "color": "red",
+                "color": "#d03b3b",
                 "value": 1
               }
             ]
@@ -102,17 +130,17 @@
         },
         "overrides": []
       },
-      "id": 2
+      "id": 3
     },
     {
       "type": "stat",
-      "title": "Collections with CAT I",
-      "description": "How many collections currently have at least one open CAT I.",
+      "title": "Collections affected",
+      "description": "Collections with \u22651 open CAT I.",
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 6,
         "x": 6,
-        "y": 3
+        "y": 5
       },
       "datasource": {
         "type": "prometheus",
@@ -142,8 +170,8 @@
         "colorMode": "background",
         "graphMode": "area",
         "justifyMode": "auto",
+        "textMode": "value_and_name",
         "orientation": "auto",
-        "textMode": "auto",
         "wideLayout": true
       },
       "fieldConfig": {
@@ -154,11 +182,11 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "#0ca30c",
                 "value": null
               },
               {
-                "color": "red",
+                "color": "#d03b3b",
                 "value": 1
               }
             ]
@@ -169,17 +197,17 @@
         },
         "overrides": []
       },
-      "id": 3
+      "id": 4
     },
     {
       "type": "stat",
-      "title": "New CAT I this week",
-      "description": "Increase in open CAT I over the last 7 days.",
+      "title": "New this week",
+      "description": "Increase in open CAT I over 7 days.",
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 6,
         "x": 12,
-        "y": 3
+        "y": 5
       },
       "datasource": {
         "type": "prometheus",
@@ -209,8 +237,8 @@
         "colorMode": "background",
         "graphMode": "none",
         "justifyMode": "auto",
+        "textMode": "value_and_name",
         "orientation": "auto",
-        "textMode": "auto",
         "wideLayout": true
       },
       "fieldConfig": {
@@ -221,11 +249,11 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "#0ca30c",
                 "value": null
               },
               {
-                "color": "red",
+                "color": "#d03b3b",
                 "value": 1
               }
             ]
@@ -236,17 +264,17 @@
         },
         "overrides": []
       },
-      "id": 4
+      "id": 5
     },
     {
       "type": "stat",
-      "title": "CAT I assessed coverage",
-      "description": "Share of required CAT I rules that have a result.",
+      "title": "CAT I coverage",
+      "description": "Share of required CAT I rules assessed.",
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 6,
         "x": 18,
-        "y": 3
+        "y": 5
       },
       "datasource": {
         "type": "prometheus",
@@ -276,8 +304,8 @@
         "colorMode": "background",
         "graphMode": "area",
         "justifyMode": "auto",
+        "textMode": "value_and_name",
         "orientation": "auto",
-        "textMode": "auto",
         "wideLayout": true
       },
       "fieldConfig": {
@@ -288,15 +316,15 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
+                "color": "#d03b3b",
                 "value": null
               },
               {
-                "color": "yellow",
+                "color": "#fab219",
                 "value": 80
               },
               {
-                "color": "green",
+                "color": "#0ca30c",
                 "value": 95
               }
             ]
@@ -307,17 +335,30 @@
         },
         "overrides": []
       },
-      "id": 5
+      "id": 6
+    },
+    {
+      "type": "row",
+      "title": "Enterprise trend",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 10
+      },
+      "id": 7,
+      "panels": []
     },
     {
       "type": "timeseries",
       "title": "Open CAT I over time (per collection)",
       "description": "",
       "gridPos": {
-        "h": 10,
+        "h": 9,
         "w": 12,
         "x": 0,
-        "y": 9
+        "y": 11
       },
       "datasource": {
         "type": "prometheus",
@@ -341,7 +382,10 @@
         "legend": {
           "displayMode": "list",
           "placement": "bottom",
-          "calcs": []
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
         },
         "tooltip": {
           "mode": "multi",
@@ -355,9 +399,11 @@
           "custom": {
             "drawStyle": "line",
             "lineInterpolation": "smooth",
+            "lineWidth": 2,
             "fillOpacity": 10,
             "showPoints": "never",
-            "spanNulls": true
+            "spanNulls": true,
+            "axisGridShow": true
           },
           "color": {
             "mode": "palette-classic"
@@ -365,17 +411,17 @@
         },
         "overrides": []
       },
-      "id": 6
+      "id": 8
     },
     {
       "type": "timeseries",
       "title": "Enterprise CAT I \u2014 total & weekly change",
       "description": "",
       "gridPos": {
-        "h": 10,
+        "h": 9,
         "w": 12,
         "x": 12,
-        "y": 9
+        "y": 11
       },
       "datasource": {
         "type": "prometheus",
@@ -411,7 +457,10 @@
         "legend": {
           "displayMode": "list",
           "placement": "bottom",
-          "calcs": []
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
         },
         "tooltip": {
           "mode": "multi",
@@ -425,27 +474,58 @@
           "custom": {
             "drawStyle": "line",
             "lineInterpolation": "smooth",
+            "lineWidth": 2,
             "fillOpacity": 10,
             "showPoints": "never",
-            "spanNulls": true
+            "spanNulls": true,
+            "axisGridShow": true
           },
           "color": {
             "mode": "palette-classic"
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Total open CAT I"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#d03b3b"
+                }
+              }
+            ]
+          }
+        ]
       },
-      "id": 7
+      "id": 9
+    },
+    {
+      "type": "row",
+      "title": "Live rule detail \u2014 $collection",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 20
+      },
+      "id": 10,
+      "panels": []
     },
     {
       "type": "table",
       "title": "Open CAT I findings \u2014 $collection (live)",
-      "description": "Live from STIG Manager: each open CAT I rule and how many assets fail it.",
+      "description": "Live: each open CAT I rule and how many assets fail it.",
       "gridPos": {
         "h": 12,
         "w": 14,
         "x": 0,
-        "y": 19
+        "y": 21
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
@@ -540,11 +620,11 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "green",
+                      "color": "#0ca30c",
                       "value": null
                     },
                     {
-                      "color": "red",
+                      "color": "#fab219",
                       "value": 1
                     }
                   ]
@@ -554,7 +634,7 @@
           }
         ]
       },
-      "id": 8
+      "id": 11
     },
     {
       "type": "timeseries",
@@ -564,7 +644,7 @@
         "h": 12,
         "w": 10,
         "x": 14,
-        "y": 19
+        "y": 21
       },
       "datasource": {
         "type": "prometheus",
@@ -600,7 +680,10 @@
         "legend": {
           "displayMode": "list",
           "placement": "bottom",
-          "calcs": []
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
         },
         "tooltip": {
           "mode": "multi",
@@ -614,17 +697,35 @@
           "custom": {
             "drawStyle": "line",
             "lineInterpolation": "smooth",
+            "lineWidth": 2,
             "fillOpacity": 10,
             "showPoints": "never",
-            "spanNulls": true
+            "spanNulls": true,
+            "axisGridShow": true
           },
           "color": {
             "mode": "palette-classic"
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "open CAT I"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#d03b3b"
+                }
+              }
+            ]
+          }
+        ]
       },
-      "id": 9
+      "id": 12
     }
   ],
   "refresh": "1m",
@@ -692,5 +793,5 @@
   "timezone": "browser",
   "title": "STIG Posture \u2014 CAT I War Room",
   "uid": "stig-cat1-war-room",
-  "version": 1
+  "version": 2
 }
