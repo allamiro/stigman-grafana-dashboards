@@ -1,0 +1,23 @@
+# Standalone Docker Compose for the STIG Manager posture exporter.
+# Runs ONLY the exporter — point it at an existing STIG Manager + Keycloak.
+# (The full lab stack has its own compose one level up; use this to run the
+# exporter on its own, e.g. against a remote STIG Manager.)
+#
+#   cp .env.example .env      # then edit .env and set OIDC_CLIENT_SECRET
+#   docker compose up -d
+#   curl http://localhost:9633/metrics
+#
+# .env format: KEY=value, one per line, NO quotes / NO spaces / NO inline
+# comments (compose passes values through to the container).
+services:
+  stigman-exporter:
+    build: .
+    # Or skip the build and use the published image instead:
+    # image: ghcr.io/allamiro/stigman-exporter:1.2.0
+    image: stigman-exporter:1.2.0
+    container_name: stigman-exporter
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "9633:9633"
